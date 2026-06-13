@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "RefundProcessedEvent",
+  "namespace": "com.ecommerce.events",
+  "fields": [
+    {"name": "orderId",   "type": "string"},
+    {"name": "userId",    "type": "string"},
+    {"name": "amount",    "type": "double"}
+  ]
+}
