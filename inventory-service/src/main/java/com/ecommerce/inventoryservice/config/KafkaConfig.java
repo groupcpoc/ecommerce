@@ -11,6 +11,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -21,9 +22,12 @@ import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.boot.ssl.SslBundles;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration
+@EnableConfigurationProperties(KafkaProperties.class)
 @ConditionalOnProperty(name = "app.kafka.enabled", havingValue = "true")
 public class KafkaConfig {
 
@@ -43,8 +47,9 @@ public class KafkaConfig {
     private String orderCancelledTopic;
 
     @Bean
-    public ProducerFactory<String, String> producerFactory(KafkaProperties kafkaProperties) {
-        Map<String, Object> properties = new HashMap<>(kafkaProperties.buildProducerProperties());
+    public ProducerFactory<String, String> producerFactory(KafkaProperties kafkaProperties,
+                                                           ObjectProvider<SslBundles> sslBundles) {
+        Map<String, Object> properties = new HashMap<>(kafkaProperties.buildProducerProperties(sslBundles.getIfAvailable()));
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return new DefaultKafkaProducerFactory<>(properties);
@@ -56,11 +61,28 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, String> consumerFactory(KafkaProperties kafkaProperties) {
-        Map<String, Object> properties = new HashMap<>(kafkaProperties.buildConsumerProperties());
+    public ConsumerFactory<String, String> consumerFactory(KafkaProperties kafkaProperties,
+                                                           ObjectProvider<SslBundles> sslBundles) {
+        Map<String, Object> properties = new HashMap<>(kafkaProperties.buildConsumerProperties(sslBundles.getIfAvailable()));
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         return new DefaultKafkaConsumerFactory<>(properties);
+    }
+
+    @Bean
+    public KafkaAdmin kafkaAdmin(KafkaProperties kafkaProperties, ObjectProvider<SslBundles> sslBundles) {
+        KafkaAdmin kafkaAdmin = new KafkaAdmin(kafkaProperties.buildAdminProperties(sslBundles.getIfAvailable()));
+        KafkaProperties.Admin admin = kafkaProperties.getAdmin();
+        kafkaAdmin.setFatalIfBrokerNotAvailable(admin.isFailFast());
+        kafkaAdmin.setAutoCreate(admin.isAutoCreate());
+        kafkaAdmin.setModifyTopicConfigs(admin.isModifyTopicConfigs());
+        if (admin.getCloseTimeout() != null) {
+            kafkaAdmin.setCloseTimeout(Math.toIntExact(admin.getCloseTimeout().getSeconds()));
+        }
+        if (admin.getOperationTimeout() != null) {
+            kafkaAdmin.setOperationTimeout(Math.toIntExact(admin.getOperationTimeout().getSeconds()));
+        }
+        return kafkaAdmin;
     }
 
     @Bean

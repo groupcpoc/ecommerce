@@ -1,6 +1,7 @@
 package com.ecommerce.inventoryservice;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,5 +66,44 @@ class InventoryServiceApplicationTests {
                 .andExpect(jsonPath("$.data.totalQuantity").value(5))
                 .andExpect(jsonPath("$.data.availableQuantity").value(5))
                 .andExpect(jsonPath("$.errorCode").value(""));
+    }
+
+    @Test
+    void restockViaGetQueryParamsWorks() throws Exception {
+        mockMvc.perform(get("/api/inventory/P3003/restock")
+                        .param("quantity", "7")
+                        .param("note", "browser test"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Inventory restocked successfully"))
+                .andExpect(jsonPath("$.data.productId").value("P3003"))
+                .andExpect(jsonPath("$.data.totalQuantity").value(7))
+                .andExpect(jsonPath("$.data.availableQuantity").value(7))
+                .andExpect(jsonPath("$.errorCode").value(""));
+    }
+
+    @Test
+    void restockWithoutQuantityReturnsValidationError() throws Exception {
+        mockMvc.perform(get("/api/inventory/P3003/restock"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("Missing required request parameter: quantity"));
+    }
+
+    @Test
+    void getOnPostOnlyEndpointReturnsMethodNotAllowed() throws Exception {
+        mockMvc.perform(post("/api/inventory/low-stock"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("METHOD_NOT_ALLOWED"));
+    }
+
+    @Test
+    void faviconReturnsNotFoundResponse() throws Exception {
+        mockMvc.perform(get("/favicon.ico"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("RESOURCE_NOT_FOUND"));
     }
 }

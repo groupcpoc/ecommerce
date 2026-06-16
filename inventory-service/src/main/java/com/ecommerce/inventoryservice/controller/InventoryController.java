@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,6 +62,18 @@ public class InventoryController {
     public ResponseEntity<ApiResponse<InventoryResponse>> restockInventory(
             @PathVariable @NotBlank String productId,
             @Valid @RequestBody RestockRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Inventory restocked successfully",
+                inventoryService.restock(productId, request)));
+    }
+
+    @GetMapping("/{productId}/restock")
+    public ResponseEntity<ApiResponse<InventoryResponse>> restockInventoryFromQuery(
+            @PathVariable @NotBlank String productId,
+            @RequestParam Integer quantity,
+            @RequestParam(required = false) String note) {
+        RestockRequest request = new RestockRequest();
+        request.setQuantity(quantity);
+        request.setNote(note);
         return ResponseEntity.ok(ApiResponse.success("Inventory restocked successfully",
                 inventoryService.restock(productId, request)));
     }
