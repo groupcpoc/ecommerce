@@ -1,0 +1,43 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: product-service
+
+  # 🔐 OAuth2 Resource Server (Keycloak)
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/ecommerce-realm
+          jwk-set-uri: http://localhost:8080/realms/ecommerce-realm/protocol/openid-connect/certs
+
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce_product_db
+    username: postgres
+    password: postgres
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+    # Enable lazy loading
+    open-in-view: false
+
+# Eureka Configuration (Disabled for local testing)
+eureka:
+  client:
+    enabled: false
+
+# Logging
+logging:
+  level:
+    com.ecommerce.product: DEBUG
+    org.springframework.security: DEBUG
