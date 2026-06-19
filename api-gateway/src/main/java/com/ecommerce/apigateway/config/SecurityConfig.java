@@ -8,8 +8,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+
+import com.ecommerce.apigateway.handler.CustomAccessDeniedHandler;
+import com.ecommerce.apigateway.handler.CustomAuthenticationEntryPoint;
+
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.core.convert.converter.Converter;
 import reactor.core.publisher.Mono;
@@ -25,10 +28,10 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        System.out.println("######## SECURITY CONFIG LOADED ########");
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
@@ -36,18 +39,21 @@ public class SecurityConfig {
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
                         // Payment service — specific rules
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund")
+                        .hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments/me").hasRole("CUSTOMER")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments/**").hasRole("CUSTOMER")
+                        .pathMatchers("/api/payments/**").denyAll()
+
                         .pathMatchers("/api/orders/**").hasAnyRole("CUSTOMER", "ADMIN")
                         .pathMatchers("/api/users/**").hasAnyRole("CUSTOMER", "ADMIN")
-                        .anyExchange().authenticated()
-                )
-                .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler))
+                        .anyExchange().authenticated())
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                );
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
         return http.build();
     }
 
@@ -69,5 +75,3 @@ public class SecurityConfig {
                 .collect(Collectors.toList());
     }
 }
-
-
