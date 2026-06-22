@@ -1,0 +1,497 @@
+{
+  "info": {
+    "name": "E-Commerce Order Service API",
+    "description": "Postman Collection for E-Commerce Order Service — REST APIs + Kafka Event Simulation.\n\nIncludes:\n- Keycloak Authentication\n- Customer Endpoints (Place, View, Cancel)\n- Admin Endpoints (View All, Update Status, Cancel)\n- Kafka Event Simulation (payment.failed, inventory.failed, inventory.reserved)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get Bearer Access Token (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+                  "    console.log(\"Access Token successfully stored in access_token variable.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{client_secret}}",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "{{username}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_url}}/realms/ecommerce/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_url}}"
+              ],
+              "path": [
+                "realms",
+                "ecommerce",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "description": "Authenticates the user against Keycloak and stores the returned Access Token into the collection-scoped variable `access_token` automatically."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customer Endpoints",
+      "item": [
+        {
+          "name": "Place Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.orderId) {",
+                  "    pm.collectionVariables.set(\"last_order_uuid\", jsonData.orderId);",
+                  "    pm.collectionVariables.set(\"last_order_id\", jsonData.id);",
+                  "    console.log(\"Stored orderId=\" + jsonData.orderId + \", id=\" + jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\"Pizza\", \"Coke\"],\n  \"amount\": 350.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{order_service_url}}/api/orders",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "Places a new order for the authenticated Customer. Requires the `CUSTOMER` role.\n\nAutomatically stores the returned `orderId` (UUID) and `id` (DB primary key) into collection variables for use in subsequent requests."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Orders (Order History)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/orders/me",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "me"
+              ]
+            },
+            "description": "Retrieves the order history of the currently logged-in Customer. Requires the `CUSTOMER` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "description": "Retrieves details of a specific order by ID. Customer can only view their own orders."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Own Order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "description": "Cancels an own order if it is in PENDING state. Requires the `CUSTOMER` role.\n\nThis now also publishes an `order.cancelled` event to Kafka."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Endpoints",
+      "item": [
+        {
+          "name": "Get All Orders (System-wide)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/orders",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "Retrieves all orders in the system. Requires the `ADMIN` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{order_service_url}}/api/orders/{{last_order_id}}/status",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}",
+                "status"
+              ]
+            },
+            "description": "Updates the status of an order. Valid values: PENDING, CONFIRMED, PREPARING, DELIVERED, CANCELLED. Requires the `ADMIN` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Any Order (Admin Override)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "description": "Admin override to cancel any order by ID. Requires the `ADMIN` role.\n\nThis now also publishes an `order.cancelled` event to Kafka."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Kafka Event Simulation",
+      "description": "Simulate Kafka events from Payment and Inventory services by producing messages directly to Kafka using `docker exec`. Run these from the command line or terminal.\n\nNOTE: These are shown as documentation requests — use the curl commands in the description to produce events via the Kafka CLI inside Docker.",
+      "item": [
+        {
+          "name": "Simulate payment.failed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "After producing a `payment.failed` event, use this request to verify the order status changed to CANCELLED.\n\n**To produce the event, run this in your terminal:**\n\n```\ndocker exec -it ecommerce-kafka kafka-console-producer --bootstrap-server localhost:9092 --topic payment.failed\n```\n\nThen type this JSON and press Enter:\n```json\n{\"orderId\":\"<PASTE_ORDER_UUID_HERE>\"}\n```\n\nReplace `<PASTE_ORDER_UUID_HERE>` with the actual UUID from the Place Order response."
+          },
+          "response": []
+        },
+        {
+          "name": "Simulate inventory.reserved",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "After producing an `inventory.reserved` event, use this request to verify the order status changed to CONFIRMED.\n\n**To produce the event, run this in your terminal:**\n\n```\ndocker exec -it ecommerce-kafka kafka-console-producer --bootstrap-server localhost:9092 --topic inventory.reserved\n```\n\nThen type this JSON and press Enter:\n```json\n{\"orderId\":\"<PASTE_ORDER_UUID_HERE>\"}\n```\n\nReplace `<PASTE_ORDER_UUID_HERE>` with the actual UUID from the Place Order response."
+          },
+          "response": []
+        },
+        {
+          "name": "Simulate inventory.failed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{order_service_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "After producing an `inventory.failed` event, use this request to verify the order status changed to CANCELLED.\n\n**To produce the event, run this in your terminal:**\n\n```\ndocker exec -it ecommerce-kafka kafka-console-producer --bootstrap-server localhost:9092 --topic inventory.failed\n```\n\nThen type this JSON and press Enter:\n```json\n{\"orderId\":\"<PASTE_ORDER_UUID_HERE>\"}\n```\n\nReplace `<PASTE_ORDER_UUID_HERE>` with the actual UUID from the Place Order response."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "keycloak_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "order_service_url",
+      "value": "http://localhost:8086",
+      "type": "string"
+    },
+    {
+      "key": "client_id",
+      "value": "order-service-client",
+      "type": "string"
+    },
+    {
+      "key": "client_secret",
+      "value": "my-client-secret",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "testuser",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "password",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_order_uuid",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_order_id",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}
