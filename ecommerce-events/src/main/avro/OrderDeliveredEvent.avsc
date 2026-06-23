@@ -1,0 +1,24 @@
+{
+  "type": "record",
+  "name": "OrderDeliveredEvent",
+  "namespace": "com.ecommerce.events",
+  "fields": [
+    {
+      "name": "orderId",
+      "type": "string"
+    },
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "deliveryExecutiveId",
+      "type": "string"
+    },
+    {
+      "name": "deliveredAt",
+      "type": "long",
+      "logicalType": "timestamp-millis"
+    }
+  ]
+}
