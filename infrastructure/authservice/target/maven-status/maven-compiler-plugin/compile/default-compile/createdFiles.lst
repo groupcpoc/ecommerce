@@ -1,0 +1,14 @@
+com\example\authservice\model\TokenResponse.class
+com\example\authservice\kafka\KafkaProducerService.class
+com\example\authservice\AuthserviceApplication.class
+com\example\authservice\model\LogoutRequest.class
+com\example\authservice\controller\AuthController.class
+com\example\authservice\model\RefreshRequest.class
+com\example\authservice\model\RegisterRequest.class
+com\example\authservice\config\AppConfig.class
+com\example\authservice\config\SecurityConfig.class
+com\example\authservice\service\KeycloakService.class
+com\example\authservice\service\AuthService.class
+com\example\authservice\util\TokenUtil.class
+com\example\authservice\model\LoginRequest.class
+com\example\authservice\service\KeycloakLogoutService.class
