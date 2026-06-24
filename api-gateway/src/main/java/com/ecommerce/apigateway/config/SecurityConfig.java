@@ -37,7 +37,15 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/api/auth/**").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
+                        // Product service
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products").hasRole("CUSTOMER")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/*").hasRole("CUSTOMER")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/search").hasRole("CUSTOMER")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/categories").hasRole("CUSTOMER")
+                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/products").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+                         .pathMatchers("/api/products/**").denyAll()
                         // Payment service — specific rules
                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund")
                         .hasRole("ADMIN")
