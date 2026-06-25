@@ -50,6 +50,14 @@ public class SecurityConfig {
                          .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/notifications").hasRole("ADMIN")
                          .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/notifications/**").hasRole("ADMIN")
                          .pathMatchers("/api/notifications/**").denyAll()
+                        // Inventory service
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/*").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/inventory/*").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/inventory/*/restock").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/low-stock").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/order/*").hasRole("DELIVERY_EXECUTIVE")
+                         .pathMatchers("/api/inventory/**").denyAll()
                         // Payment service — specific rules
                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund")
                         .hasRole("ADMIN")
