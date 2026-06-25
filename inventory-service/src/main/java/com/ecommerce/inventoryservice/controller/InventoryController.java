@@ -7,6 +7,7 @@ import com.ecommerce.inventoryservice.dto.InventoryCreateRequest;
 import com.ecommerce.inventoryservice.dto.InventoryResponse;
 import com.ecommerce.inventoryservice.dto.InventorySummaryResponse;
 import com.ecommerce.inventoryservice.dto.InventoryUpdateRequest;
+import com.ecommerce.inventoryservice.dto.OrderStockResponse;
 import com.ecommerce.inventoryservice.dto.RestockRequest;
 import com.ecommerce.inventoryservice.service.InventoryService;
 import jakarta.validation.Valid;
@@ -25,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/inventory")
 @Validated
-public class InventoryController {
+public class
+InventoryController {
 
     private final InventoryService inventoryService;
 
@@ -82,5 +84,12 @@ public class InventoryController {
     public ResponseEntity<ApiResponse<List<InventorySummaryResponse>>> getLowStockInventory() {
         return ResponseEntity.ok(ApiResponse.success("Low stock inventory fetched successfully",
                 inventoryService.getLowStockInventory()));
+    }
+
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<ApiResponse<OrderStockResponse>> getOrderStock(
+            @PathVariable @NotBlank String orderId) {
+        return ResponseEntity.ok(ApiResponse.success("Order stock fetched successfully",
+                inventoryService.getOrderStock(orderId)));
     }
 }

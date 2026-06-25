@@ -1,1 +1,8 @@
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\test\java\com\ecommerce\inventoryservice\config\KafkaConfigTest.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\test\java\com\ecommerce\inventoryservice\controller\InventoryControllerTest.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\test\java\com\ecommerce\inventoryservice\exception\GlobalExceptionHandlerTest.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\test\java\com\ecommerce\inventoryservice\InventoryServiceApplicationTests.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\test\java\com\ecommerce\inventoryservice\model\ModelAndApplicationTests.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\test\java\com\ecommerce\inventoryservice\service\impl\InventoryServiceImplTest.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\test\java\com\ecommerce\inventoryservice\service\impl\KafkaEventPublisherImplTest.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\test\java\com\ecommerce\inventoryservice\service\impl\KafkaInventoryListenerTest.java

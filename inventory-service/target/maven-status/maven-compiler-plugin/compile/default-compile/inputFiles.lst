@@ -5,6 +5,8 @@ C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\e
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\dto\InventoryResponse.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\dto\InventorySummaryResponse.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\dto\InventoryUpdateRequest.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\dto\OrderStockItemResponse.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\dto\OrderStockResponse.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\dto\ReservationResponse.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\dto\RestockRequest.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\entity\InventoryItem.java
@@ -18,6 +20,7 @@ C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\e
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\exception\GlobalExceptionHandler.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\exception\InventoryDomainException.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\exception\InventoryNotFoundException.java
+C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\exception\OrderStockNotFoundException.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\InventoryServiceApplication.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\repository\InventoryItemRepository.java
 C:\Users\user\IdeaProjects\ecommerce clone\inventory-service\src\main\java\com\ecommerce\inventoryservice\repository\ProcessedKafkaEventRepository.java

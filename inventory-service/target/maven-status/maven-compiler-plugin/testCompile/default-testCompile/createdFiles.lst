@@ -1,1 +1,10 @@
+com\ecommerce\inventoryservice\service\impl\KafkaEventPublisherImplTest.class
 com\ecommerce\inventoryservice\InventoryServiceApplicationTests.class
+com\ecommerce\inventoryservice\controller\InventoryControllerTest.class
+com\ecommerce\inventoryservice\model\ModelAndApplicationTests.class
+com\ecommerce\inventoryservice\service\impl\KafkaInventoryListenerTest.class
+com\ecommerce\inventoryservice\service\impl\InventoryServiceImplTest.class
+com\ecommerce\inventoryservice\exception\GlobalExceptionHandlerTest$Sample.class
+com\ecommerce\inventoryservice\service\impl\KafkaEventPublisherImplTest$1.class
+com\ecommerce\inventoryservice\exception\GlobalExceptionHandlerTest.class
+com\ecommerce\inventoryservice\config\KafkaConfigTest.class

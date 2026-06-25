@@ -32,6 +32,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(ApiResponse.failure(ex.getMessage(), "INVENTORY_OPERATION_FAILED", null));
     }
 
+    @ExceptionHandler(OrderStockNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOrderStockNotFound(OrderStockNotFoundException ex) {
+        return ResponseEntity.ok(ApiResponse.failure(ex.getMessage(), "ORDER_STOCK_NOT_FOUND", null));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Object>> handleValidation(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()

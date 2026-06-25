@@ -9,6 +9,8 @@ import com.ecommerce.inventoryservice.dto.InventoryCreateRequest;
 import com.ecommerce.inventoryservice.dto.InventoryResponse;
 import com.ecommerce.inventoryservice.dto.InventorySummaryResponse;
 import com.ecommerce.inventoryservice.dto.InventoryUpdateRequest;
+import com.ecommerce.inventoryservice.dto.OrderStockItemResponse;
+import com.ecommerce.inventoryservice.dto.OrderStockResponse;
 import com.ecommerce.inventoryservice.dto.ReservationResponse;
 import com.ecommerce.inventoryservice.dto.RestockRequest;
 import com.ecommerce.inventoryservice.entity.InventoryItem;
@@ -21,6 +23,7 @@ import com.ecommerce.inventoryservice.event.PaymentItemEvent;
 import com.ecommerce.inventoryservice.event.PaymentProcessedEvent;
 import com.ecommerce.inventoryservice.exception.InventoryDomainException;
 import com.ecommerce.inventoryservice.exception.InventoryNotFoundException;
+import com.ecommerce.inventoryservice.exception.OrderStockNotFoundException;
 import com.ecommerce.inventoryservice.repository.InventoryItemRepository;
 import com.ecommerce.inventoryservice.repository.ProcessedKafkaEventRepository;
 import com.ecommerce.inventoryservice.repository.StockReservationRepository;
@@ -134,6 +137,26 @@ public class InventoryServiceImpl implements InventoryService {
                 .filter(this::isLowStock)
                 .map(this::toSummaryResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public OrderStockResponse getOrderStock(String orderId) {
+        if (orderId == null || orderId.isBlank()) {
+            throw new OrderStockNotFoundException("Order stock not found for orderId: " + orderId);
+        }
+
+        List<StockReservation> reservations = stockReservationRepository.findByOrderIdOrderByCreatedAtDesc(orderId);
+        if (reservations.isEmpty()) {
+            throw new OrderStockNotFoundException("Order stock not found for orderId: " + orderId);
+        }
+
+        OrderStockResponse response = new OrderStockResponse();
+        response.setOrderId(orderId);
+        response.setItems(reservations.stream()
+                .map(this::toOrderStockItemResponse)
+                .collect(Collectors.toList()));
+        return response;
     }
 
     @Override
@@ -336,6 +359,29 @@ public class InventoryServiceImpl implements InventoryService {
                     return response;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private OrderStockItemResponse toOrderStockItemResponse(StockReservation reservation) {
+        OrderStockItemResponse response = new OrderStockItemResponse();
+        response.setProductId(reservation.getProductId());
+        response.setQuantity(reservation.getQuantity());
+        response.setStatus(reservation.getStatus() != null ? reservation.getStatus().name() : null);
+        response.setReason(reservation.getReason());
+        response.setEventId(reservation.getEventId());
+        response.setCreatedAt(reservation.getCreatedAt());
+
+        InventoryItem item = inventoryItemRepository.findByProductId(reservation.getProductId()).orElse(null);
+        if (item != null) {
+            response.setProductName(item.getProductName());
+            response.setTotalQuantity(safeInt(item.getTotalQuantity()));
+            response.setAvailableQuantity(safeInt(item.getAvailableQuantity()));
+            response.setReservedQuantity(safeInt(item.getReservedQuantity()));
+            response.setActive(item.getActive());
+        } else {
+            response.setProductName(reservation.getProductId());
+        }
+
+        return response;
     }
 
     private String nonBlankEventId(PaymentProcessedEvent event) {

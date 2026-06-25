@@ -11,9 +11,11 @@ com\ecommerce\inventoryservice\InventoryServiceApplication.class
 com\ecommerce\inventoryservice\repository\StockReservationRepository.class
 com\ecommerce\inventoryservice\config\KafkaConfig.class
 com\ecommerce\inventoryservice\entity\InventoryItem.class
+com\ecommerce\inventoryservice\exception\OrderStockNotFoundException.class
 com\ecommerce\inventoryservice\dto\InventoryResponse.class
 com\ecommerce\inventoryservice\service\impl\InventoryServiceImpl$ReservationPlan.class
 com\ecommerce\inventoryservice\exception\GlobalExceptionHandler.class
+com\ecommerce\inventoryservice\dto\OrderStockResponse.class
 com\ecommerce\inventoryservice\service\impl\NoOpKafkaEventPublisher.class
 com\ecommerce\inventoryservice\dto\RestockRequest.class
 com\ecommerce\inventoryservice\dto\ApiResponse.class
@@ -25,6 +27,7 @@ com\ecommerce\inventoryservice\service\impl\KafkaEventPublisherImpl.class
 com\ecommerce\inventoryservice\service\KafkaEventPublisher.class
 com\ecommerce\inventoryservice\controller\InventoryController.class
 com\ecommerce\inventoryservice\service\impl\InventoryServiceImpl.class
+com\ecommerce\inventoryservice\dto\OrderStockItemResponse.class
 com\ecommerce\inventoryservice\repository\ProcessedKafkaEventRepository.class
 com\ecommerce\inventoryservice\service\InventoryService.class
 com\ecommerce\inventoryservice\event\PaymentItemEvent.class

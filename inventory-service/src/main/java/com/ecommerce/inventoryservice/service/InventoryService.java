@@ -6,6 +6,7 @@ import com.ecommerce.inventoryservice.dto.InventoryCreateRequest;
 import com.ecommerce.inventoryservice.dto.InventoryResponse;
 import com.ecommerce.inventoryservice.dto.InventorySummaryResponse;
 import com.ecommerce.inventoryservice.dto.InventoryUpdateRequest;
+import com.ecommerce.inventoryservice.dto.OrderStockResponse;
 import com.ecommerce.inventoryservice.dto.RestockRequest;
 import com.ecommerce.inventoryservice.event.OrderCancelledEvent;
 import com.ecommerce.inventoryservice.event.PaymentProcessedEvent;
@@ -23,6 +24,8 @@ public interface InventoryService {
     InventoryResponse restock(String productId, RestockRequest request);
 
     List<InventorySummaryResponse> getLowStockInventory();
+
+    OrderStockResponse getOrderStock(String orderId);
 
     void processPaymentProcessedEvent(PaymentProcessedEvent event);
 
