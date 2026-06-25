@@ -35,7 +35,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/api/auth/**").permitAll()
+                        
                         .pathMatchers("/actuator/**").permitAll()
                         // Product service
                          .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products").hasRole("CUSTOMER")
@@ -98,7 +98,18 @@ public class SecurityConfig {
                          .hasRole("ADMIN")
 
                          .pathMatchers("/api/users/**").denyAll()
-                         
+                         // Auth service
+
+                        // Public
+                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/register").permitAll()
+                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/login").permitAll()
+                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/refresh").permitAll()
+
+                        // Admin
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/users").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/auth/users/**").hasRole("ADMIN")
+
+                         .pathMatchers("/api/auth/**").denyAll()
                          .anyExchange().authenticated())
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(customAccessDeniedHandler)
