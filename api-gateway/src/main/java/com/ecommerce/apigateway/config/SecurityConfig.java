@@ -84,8 +84,21 @@ public class SecurityConfig {
                          .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/delivery-status").hasRole("DELIVERY_EXECUTIVE")
 
                          .pathMatchers("/api/orders/**").denyAll()
-                        
-                         .pathMatchers("/api/users/**").hasAnyRole("CUSTOMER", "ADMIN")
+                        // User service
+
+                        // Customer
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/users/me")
+                         .hasRole("CUSTOMER")
+
+                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/me")
+                         .hasRole("CUSTOMER")
+
+                        // Admin
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/users")
+                         .hasRole("ADMIN")
+
+                         .pathMatchers("/api/users/**").denyAll()
+                         
                          .anyExchange().authenticated())
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(customAccessDeniedHandler)
