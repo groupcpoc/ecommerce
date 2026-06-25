@@ -46,6 +46,10 @@ public class SecurityConfig {
                          .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
                          .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
                          .pathMatchers("/api/products/**").denyAll()
+                        // Notification service
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/notifications").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/notifications/**").hasRole("ADMIN")
+                         .pathMatchers("/api/notifications/**").denyAll()
                         // Payment service — specific rules
                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund")
                         .hasRole("ADMIN")
