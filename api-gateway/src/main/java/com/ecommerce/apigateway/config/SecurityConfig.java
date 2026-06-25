@@ -59,16 +59,34 @@ public class SecurityConfig {
                          .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/order/*").hasRole("DELIVERY_EXECUTIVE")
                          .pathMatchers("/api/inventory/**").denyAll()
                         // Payment service — specific rules
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund")
-                        .hasRole("ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments/me").hasRole("CUSTOMER")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments").hasRole("ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments/**").hasRole("CUSTOMER")
-                        .pathMatchers("/api/payments/**").denyAll()
+                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund")
+                         .hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments/me").hasRole("CUSTOMER")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments/**").hasRole("CUSTOMER")
+                         .pathMatchers("/api/payments/**").denyAll()
+                        // Order service
 
-                        .pathMatchers("/api/orders/**").hasAnyRole("CUSTOMER", "ADMIN")
-                        .pathMatchers("/api/users/**").hasAnyRole("CUSTOMER", "ADMIN")
-                        .anyExchange().authenticated())
+                         // Customer
+                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/orders").hasRole("CUSTOMER")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/me").hasRole("CUSTOMER")
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/*").hasRole("CUSTOMER")
+                         .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/orders/*").hasRole("CUSTOMER")
+
+                        // Admin
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/status").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/orders/*").hasRole("ADMIN")
+                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/assign").hasRole("ADMIN")
+
+                        // Delivery Executive
+                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/assigned").hasRole("DELIVERY_EXECUTIVE")
+                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/delivery-status").hasRole("DELIVERY_EXECUTIVE")
+
+                         .pathMatchers("/api/orders/**").denyAll()
+                        
+                         .pathMatchers("/api/users/**").hasAnyRole("CUSTOMER", "ADMIN")
+                         .anyExchange().authenticated())
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(customAccessDeniedHandler)
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
