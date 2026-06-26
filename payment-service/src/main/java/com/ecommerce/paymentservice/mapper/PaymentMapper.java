@@ -5,6 +5,10 @@ import com.ecommerce.paymentservice.entity.Payment;
 
 public class PaymentMapper {
 
+    private PaymentMapper() {
+        // utility class, prevent instantiation
+    }
+
     public static PaymentResponseDTO toDTO(Payment payment) {
         return new PaymentResponseDTO(
                 payment.getId(),
@@ -15,7 +19,6 @@ public class PaymentMapper {
                 payment.getRazorpayPaymentId(),
                 payment.getFailureReason(),
                 payment.getCreatedAt(),
-                payment.getUpdatedAt()
-        );
+                payment.getUpdatedAt());
     }
 }

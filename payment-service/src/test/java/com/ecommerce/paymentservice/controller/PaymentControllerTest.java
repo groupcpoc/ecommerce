@@ -7,11 +7,12 @@ import com.ecommerce.paymentservice.service.PaymentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.time.Month;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -20,66 +21,68 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(PaymentController.class)
 class PaymentControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private PaymentService paymentService;
+        @MockitoBean
+        private PaymentService paymentService;
 
-    @Test
-    void getMyPayments_returnsListForUser() throws Exception {
-        PaymentResponseDTO dto = sampleDto();
-        when(paymentService.getMyPayments("user-1")).thenReturn(List.of(dto));
+        private static final LocalDateTime FIXED_TIME = LocalDateTime.of(2026, Month.JANUARY, 1, 10, 0);
 
-        mockMvc.perform(get("/api/payments/me").header("X-User-Id", "user-1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value("p1"))
-                .andExpect(jsonPath("$[0].status").value("SUCCESS"));
-    }
+        @Test
+        void getMyPayments_returnsListForUser() throws Exception {
+                PaymentResponseDTO dto = sampleDto();
+                when(paymentService.getMyPayments("user-1")).thenReturn(List.of(dto));
 
-    @Test
-    void getPaymentById_whenFound_returnsPayment() throws Exception {
-        PaymentResponseDTO dto = sampleDto();
-        when(paymentService.getPaymentById("p1", "user-1")).thenReturn(dto);
+                mockMvc.perform(get("/api/payments/me").header("X-User-Id", "user-1"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].id").value("p1"))
+                                .andExpect(jsonPath("$[0].status").value("SUCCESS"));
+        }
 
-        mockMvc.perform(get("/api/payments/p1").header("X-User-Id", "user-1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orderId").value("order-1"));
-    }
+        @Test
+        void getPaymentById_whenFound_returnsPayment() throws Exception {
+                PaymentResponseDTO dto = sampleDto();
+                when(paymentService.getPaymentById("p1", "user-1")).thenReturn(dto);
 
-    @Test
-    void getPaymentById_whenNotFound_returns404() throws Exception {
-        when(paymentService.getPaymentById("missing", "user-1"))
-                .thenThrow(new PaymentNotFoundException("missing"));
+                mockMvc.perform(get("/api/payments/p1").header("X-User-Id", "user-1"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.orderId").value("order-1"));
+        }
 
-        mockMvc.perform(get("/api/payments/missing").header("X-User-Id", "user-1"))
-                .andExpect(status().isNotFound());
-    }
+        @Test
+        void getPaymentById_whenNotFound_returns404() throws Exception {
+                when(paymentService.getPaymentById("missing", "user-1"))
+                                .thenThrow(new PaymentNotFoundException("missing"));
 
-    @Test
-    void getAllPayments_returnsAll() throws Exception {
-        when(paymentService.getAllPayments()).thenReturn(List.of(sampleDto()));
+                mockMvc.perform(get("/api/payments/missing").header("X-User-Id", "user-1"))
+                                .andExpect(status().isNotFound());
+        }
 
-        mockMvc.perform(get("/api/payments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
+        @Test
+        void getAllPayments_returnsAll() throws Exception {
+                when(paymentService.getAllPayments()).thenReturn(List.of(sampleDto()));
 
-    @Test
-    void refundPayment_returnsRefundedDto() throws Exception {
-        PaymentResponseDTO refunded = new PaymentResponseDTO(
-                "p1", "order-1", "user-1", 100.0, PaymentStatus.REFUNDED,
-                "rzp_1", null, LocalDateTime.now(), LocalDateTime.now());
-        when(paymentService.refundPayment("p1")).thenReturn(refunded);
+                mockMvc.perform(get("/api/payments"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(1));
+        }
 
-        mockMvc.perform(post("/api/payments/p1/refund"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("REFUNDED"));
-    }
+        @Test
+        void refundPayment_returnsRefundedDto() throws Exception {
+                PaymentResponseDTO refunded = new PaymentResponseDTO(
+                                "p1", "order-1", "user-1", 100.0, PaymentStatus.REFUNDED,
+                                "rzp_1", null, FIXED_TIME, FIXED_TIME);
+                when(paymentService.refundPayment("p1")).thenReturn(refunded);
 
-    private PaymentResponseDTO sampleDto() {
-        return new PaymentResponseDTO(
-                "p1", "order-1", "user-1", 100.0, PaymentStatus.SUCCESS,
-                "rzp_1", null, LocalDateTime.now(), LocalDateTime.now());
-    }
+                mockMvc.perform(post("/api/payments/p1/refund"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.status").value("REFUNDED"));
+        }
+
+        private PaymentResponseDTO sampleDto() {
+                return new PaymentResponseDTO(
+                                "p1", "order-1", "user-1", 100.0, PaymentStatus.SUCCESS,
+                                "rzp_1", null, FIXED_TIME, FIXED_TIME);
+        }
 }

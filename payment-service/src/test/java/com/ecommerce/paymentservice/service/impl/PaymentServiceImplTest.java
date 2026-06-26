@@ -46,9 +46,10 @@ class PaymentServiceImplTest {
     private PaymentServiceImpl paymentService;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         paymentService = new PaymentServiceImpl(paymentRepository, eventPublisher, razorpayClient);
-        // RazorpayClient.orders is a public field on the SDK object, not a getter — set it directly
+        // RazorpayClient.orders is a public field on the SDK object, not a getter — set
+        // it directly
         razorpayClient.orders = orderClient;
     }
 
@@ -81,11 +82,9 @@ class PaymentServiceImplTest {
 
         paymentService.processPayment(event);
 
-        verify(paymentRepository).save(argThat(payment ->
-                payment.getOrderId().equals("order-1") &&
-                        payment.getStatus() == PaymentStatus.SUCCESS &&
-                        payment.getRazorpayPaymentId().equals("rzp_order_123")
-        ));
+        verify(paymentRepository).save(argThat(payment -> payment.getOrderId().equals("order-1") &&
+                payment.getStatus() == PaymentStatus.SUCCESS &&
+                payment.getRazorpayPaymentId().equals("rzp_order_123")));
         verify(eventPublisher).publishPaymentProcessed(event);
         verify(eventPublisher, never()).publishPaymentFailed(any(), any());
     }
@@ -103,11 +102,9 @@ class PaymentServiceImplTest {
 
         paymentService.processPayment(event);
 
-        verify(paymentRepository).save(argThat(payment ->
-                payment.getOrderId().equals("order-2") &&
-                        payment.getStatus() == PaymentStatus.FAILED &&
-                        payment.getFailureReason().equals("Gateway timeout")
-        ));
+        verify(paymentRepository).save(argThat(payment -> payment.getOrderId().equals("order-2") &&
+                payment.getStatus() == PaymentStatus.FAILED &&
+                payment.getFailureReason().equals("Gateway timeout")));
         verify(eventPublisher).publishPaymentFailed(event, "Gateway timeout");
         verify(eventPublisher, never()).publishPaymentProcessed(any());
     }

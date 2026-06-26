@@ -15,7 +15,6 @@ import com.razorpay.RazorpayException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -52,8 +51,8 @@ public class PaymentServiceImpl implements PaymentService {
                     .amount(event.getAmount())
                     .status(PaymentStatus.SUCCESS)
                     .razorpayPaymentId(razorpayId)
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
+                    .createdAt(LocalDateTime.now(java.time.ZoneOffset.UTC))
+                    .updatedAt(LocalDateTime.now(java.time.ZoneOffset.UTC))
                     .build();
             paymentRepository.save(payment);
 
@@ -68,8 +67,8 @@ public class PaymentServiceImpl implements PaymentService {
                     .amount(event.getAmount())
                     .status(PaymentStatus.FAILED)
                     .failureReason(e.getMessage())
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
+                    .createdAt(LocalDateTime.now(java.time.ZoneOffset.UTC))
+                    .updatedAt(LocalDateTime.now(java.time.ZoneOffset.UTC))
                     .build();
             paymentRepository.save(payment);
 
@@ -99,7 +98,8 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentRepository.findAll()
                 .stream()
                 .map(PaymentMapper::toDTO)
-                .toList(); }
+                .toList();
+    }
 
     @Override
     public PaymentResponseDTO refundPayment(String id) {
@@ -111,7 +111,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         payment.setStatus(PaymentStatus.REFUNDED);
-        payment.setUpdatedAt(LocalDateTime.now());
+        payment.setUpdatedAt(LocalDateTime.now(java.time.ZoneOffset.UTC));
         paymentRepository.save(payment);
 
         eventPublisher.publishRefundProcessed(payment);
@@ -125,7 +125,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .ifPresent(payment -> {
                     if (payment.getStatus() == PaymentStatus.SUCCESS) {
                         payment.setStatus(PaymentStatus.REFUND_REQUESTED);
-                        payment.setUpdatedAt(LocalDateTime.now());
+                        payment.setUpdatedAt(LocalDateTime.now(java.time.ZoneOffset.UTC));
                         paymentRepository.save(payment);
                         log.info("Refund requested for orderId: {}", event.getOrderId());
                     }
