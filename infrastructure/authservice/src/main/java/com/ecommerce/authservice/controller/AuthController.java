@@ -5,7 +5,7 @@ import com.ecommerce.authservice.model.LogoutRequest;
 import com.ecommerce.authservice.model.RefreshRequest;
 import com.ecommerce.authservice.model.RegisterRequest;
 import com.ecommerce.authservice.service.AuthService;
-import com.example.authservice.model.*;
+import com.ecommerce.authservice.model.*;
 import com.ecommerce.authservice.service.KeycloakLogoutService;
 import com.ecommerce.authservice.util.TokenUtil;
 import jakarta.annotation.security.RolesAllowed;
