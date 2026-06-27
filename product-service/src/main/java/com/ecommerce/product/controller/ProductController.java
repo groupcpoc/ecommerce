@@ -3,20 +3,20 @@ package com.ecommerce.product.controller;
 import com.ecommerce.product.dto.ProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
 import com.ecommerce.product.enums.ProductStatus;
+import com.ecommerce.product.model.Product;
 import com.ecommerce.product.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/products")
-@Slf4j
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -25,25 +25,22 @@ public class ProductController {
     // ✅ CUSTOMER: Get all products
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
-        List<ProductResponse> products = productService.getAllProducts();
-        log.info("Retrieved {} products", products.size());
-        return ResponseEntity.ok(products);
+        log.info("Getting all products");
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     // ✅ CUSTOMER: Get product by ID
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-        ProductResponse response = productService.getProductById(id);
-        return ResponseEntity.ok(response);
+        log.info("Getting product by id: {}", id);
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
-    // ✅ CUSTOMER: Search products by name OR category
+    // ✅ CUSTOMER: Search by keyword
     @GetMapping("/search")
-    public ResponseEntity<List<ProductResponse>> searchProducts(
-            @RequestParam String keyword) {
-        List<ProductResponse> products = productService.searchProducts(keyword);
-        log.info("Search found {} products for keyword: {}", products.size(), keyword);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductResponse>> searchProducts(@RequestParam String keyword) {
+        log.info("Searching products with keyword: {}", keyword);
+        return ResponseEntity.ok(productService.searchByKeyword(keyword));
     }
 
     // ✅ CUSTOMER: Search with name AND category filters
@@ -51,68 +48,61 @@ public class ProductController {
     public ResponseEntity<List<ProductResponse>> searchWithFilters(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category) {
-        List<ProductResponse> products = productService.searchWithFilters(name, category);
-        return ResponseEntity.ok(products);
+        log.info("Searching products with filters: name={}, category={}", name, category);
+        return ResponseEntity.ok(productService.searchWithFilters(name, category));
     }
 
     // ✅ CUSTOMER: Get all categories
     @GetMapping("/categories")
-    public ResponseEntity<Set<String>> getAllCategories() {
-        Set<String> categories = productService.getAllCategories();
-        return ResponseEntity.ok(categories);
+    public ResponseEntity<List<String>> getCategories() {
+        log.info("Getting all categories");
+        return ResponseEntity.ok(productService.getCategories());
     }
 
     // ✅ CUSTOMER: Get products by category
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<ProductResponse>> getProductsByCategory(
-            @PathVariable String category) {
-        List<ProductResponse> products = productService.getProductsByCategory(category);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductResponse>> getProductsByCategory(@PathVariable String category) {
+        log.info("Getting products by category: {}", category);
+        return ResponseEntity.ok(productService.getProductsByCategory(category));
     }
 
     // ✅ CUSTOMER: Get products by status
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<ProductResponse>> getProductsByStatus(
-            @PathVariable ProductStatus status) {
-        List<ProductResponse> products = productService.getProductsByStatus(status);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductResponse>> getProductsByStatus(@PathVariable ProductStatus status) {
+        log.info("Getting products by status: {}", status);
+        return ResponseEntity.ok(productService.getProductsByStatus(status));
     }
 
     // ✅ ADMIN: Create product
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> createProduct(
-            @RequestBody ProductRequest productRequest) {
-        ProductResponse response = productService.createProduct(productRequest);
-        log.info("Product created with ID: {}", response.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
+        log.info("Creating product: {}", request.getName());
+        return ResponseEntity.ok(productService.createProduct(request));
     }
 
     // ✅ ADMIN: Update product
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> updateProduct(
-            @PathVariable Long id,
-            @RequestBody ProductRequest productRequest) {
-        ProductResponse response = productService.updateProduct(id, productRequest);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
+        log.info("Updating product id: {}", id);
+        return ResponseEntity.ok(productService.updateProduct(id, request));
+    }
+
+    // ✅ ADMIN: Update quantity
+    @PutMapping("/{id}/quantity")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> updateQuantity(@PathVariable Long id, @RequestParam Integer quantity) {
+        log.info("Updating quantity for product id: {}, quantity: {}", id, quantity);
+        return ResponseEntity.ok(productService.updateQuantity(id, quantity));
     }
 
     // ✅ ADMIN: Delete product
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        log.info("Deleting product id: {}", id);
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
-    }
-
-    // ✅ ADMIN: Update quantity
-    @PutMapping("/{id}/quantity")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> updateQuantity(
-            @PathVariable Long id,
-            @RequestParam Integer quantity) {
-        ProductResponse response = productService.updateQuantity(id, quantity);
-        return ResponseEntity.ok(response);
     }
 }

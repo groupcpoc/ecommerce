@@ -1,14 +1,9 @@
-package com.ecommerce.product.entity;
+package com.ecommerce.product.model;
 
 import com.ecommerce.product.enums.ProductStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 @Entity
 @Table(name = "products")
@@ -23,44 +18,35 @@ public class Product {
     private Long id;
 
     @Column(nullable = false, length = 200)
+    @NotBlank
+    @Size(max = 200)
     private String name;
 
     @Column(length = 500)
+    @Size(max = 500)
     private String description;
 
     @Column(nullable = false)
-    private BigDecimal price;
+    @NotNull
+    @DecimalMin("0.0")
+    private Double price;
 
     @Column(nullable = false)
+    @NotNull
+    @Min(0)
     private Integer quantity;
 
-    @Column(length = 100)
+    @Column(nullable = false, length = 50)
+    @NotBlank
+    @Size(max = 50)
     private String category;
 
-    @Column(length = 200)
+    @Column(nullable = false, unique = true, length = 100)
+    @NotBlank
+    @Size(max = 100)
     private String sku;
 
+    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ProductStatus status;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        if (this.status == null) {
-            this.status = ProductStatus.ACTIVE;
-        }
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }
