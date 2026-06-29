@@ -1,0 +1,15 @@
+com\ecommerce\authservice\model\RegisterRequest.class
+com\ecommerce\authservice\service\KeycloakLogoutService.class
+com\ecommerce\authservice\kafka\KafkaProducerService.class
+com\ecommerce\authservice\config\SecurityConfig.class
+com\ecommerce\authservice\controller\AuthController.class
+com\ecommerce\authservice\service\AuthService.class
+com\ecommerce\authservice\model\LoginRequest.class
+com\ecommerce\authservice\kafka\KafkaConsumerService.class
+com\ecommerce\authservice\model\RefreshRequest.class
+com\ecommerce\authservice\config\AppConfig.class
+com\ecommerce\authservice\model\LogoutRequest.class
+com\ecommerce\authservice\util\TokenUtil.class
+com\ecommerce\authservice\AuthserviceApplication.class
+com\ecommerce\authservice\model\TokenResponse.class
+com\ecommerce\authservice\service\KeycloakService.class
