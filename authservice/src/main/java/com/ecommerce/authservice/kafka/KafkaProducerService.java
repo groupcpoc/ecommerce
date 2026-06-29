@@ -1,6 +1,7 @@
 package com.ecommerce.authservice.kafka;
 
 import com.ecommerce.authservice.model.RegisterRequest;
+import com.ecommerce.authservice.model.SuspendedRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -16,4 +17,7 @@ public class KafkaProducerService {
         kafka.send("user.registered", r);
     }
 
+    public void publishUserSuspended(SuspendedRequest event) {
+        kafka.send("user.suspended",event);
+    }
 }

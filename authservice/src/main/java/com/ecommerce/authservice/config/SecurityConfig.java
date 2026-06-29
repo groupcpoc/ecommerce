@@ -23,6 +23,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/user").hasRole("admin")
                         .requestMatchers("/api/auth/{id}").hasRole("admin")
                         .requestMatchers("/api/auth/user/register").hasRole("user")
+                        .requestMatchers("/api/auth/users/*/suspend").hasRole("admin")
                         .requestMatchers("/api/auth/login").authenticated()
                         .requestMatchers("/api/auth/logout").authenticated()
                         .anyRequest().authenticated())

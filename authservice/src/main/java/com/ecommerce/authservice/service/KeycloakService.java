@@ -3,6 +3,9 @@ package com.ecommerce.authservice.service;
 import com.ecommerce.authservice.model.LoginRequest;
 import com.ecommerce.authservice.model.RegisterRequest;
 import com.ecommerce.authservice.model.TokenResponse;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -18,7 +21,8 @@ import java.util.Map;
 
 @Service
 public class KeycloakService {
-//    private static final Logger log = (Logger) LogFactory.getLog(KeycloakService.class);
+
+    private final Keycloak keycloak;
     @Autowired
     private RestTemplate rt;
     @Value("${keycloak.url}")
@@ -35,6 +39,10 @@ public class KeycloakService {
     private String pass;
     @Autowired
     private RestTemplate restTemplate;
+
+    public KeycloakService(Keycloak keycloak) {
+        this.keycloak = keycloak;
+    }
 
     private String adminToken() {
 
@@ -61,7 +69,6 @@ public class KeycloakService {
     public void createUser(RegisterRequest r, String requestType) {
         String token = adminToken();
 
-        // Step 1: Create user
         String createUserUrl = url + "/admin/realms/" + realm + "/users";
 
         Map<String, Object> user = new HashMap<>();
@@ -84,14 +91,11 @@ public class KeycloakService {
 
         ResponseEntity<Void> response = rt.postForEntity(createUserUrl, entity, Void.class);
 
-        // Step 2: Get created user ID (from Location header)
         String location = response.getHeaders().getFirst("Location");
         String userId = location.substring(location.lastIndexOf("/") + 1);
 
-        // Step 3: Determine requestType
         String roleName = requestType.equalsIgnoreCase("admin") ? "admin" : "user";
 
-        // Step 4: Fetch requestType from realm
         String roleUrl = url + "/admin/realms/" + realm + "/roles/" + roleName;
         HttpEntity<Void> roleEntity = new HttpEntity<>(headers);
 
@@ -99,8 +103,6 @@ public class KeycloakService {
                 rt.exchange(roleUrl, HttpMethod.GET, roleEntity, Map.class);
 
         Map role = roleResponse.getBody();
-
-        // Step 5: Assign requestType to user
         String assignRoleUrl = url + "/admin/realms/" + realm + "/users/" + userId + "/role-mappings/realm";
 
         List<Map> roles = new ArrayList<>();
@@ -111,34 +113,6 @@ public class KeycloakService {
         rt.exchange(assignRoleUrl, HttpMethod.POST, assignEntity, Void.class);
     }
 
-//    private String adminToken() {
-//        String u = url + "/realms/master/protocol/openid-connect/token";
-//        MultiValueMap<String, String> b = new LinkedMultiValueMap<>();
-//        b.add("client_id", client);
-//        b.add("username", user);
-//        b.add("password", pass);
-//        b.add("grant_type", "password");
-//        Map m = rt.postForObject(u, b, Map.class);
-//        return (String) m.get("access_token");
-//    }
-
-//    public void createUser(RegisterRequest r) {
-//        String t = adminToken();
-//        String u = url + "/admin/realms/" + realm + "/users";
-//        Map user = new HashMap<>();
-//        user.put("username", r.email);
-//        user.put("email", r.email);
-//        user.put("enabled", true);
-//        Map c = new HashMap<>();
-//        c.put("type", "password");
-//        c.put("value", r.password);
-//        c.put("temporary", false);
-//        user.put("credentials", List.of(c));
-//        HttpHeaders h = new HttpHeaders();
-//        h.setBearerAuth(t);
-//        h.setContentType(MediaType.APPLICATION_JSON);
-//        rt.postForObject(u, new HttpEntity<>(user, h), String.class);
-//    }
 
     public TokenResponse login(LoginRequest r) {
         String u = url + "/realms/" + realm + "/protocol/openid-connect/token";
@@ -153,7 +127,6 @@ public class KeycloakService {
     public TokenResponse refresh(String refresh_token) {
 
         String tokenUrl = url + "/realms/" + realm + "/protocol/openid-connect/token";
-//        log.info("TOken URL from KeyCloak" + tokenUrl);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("client_id", client);
         body.add("client_secret", clientsecret);
@@ -162,10 +135,26 @@ public class KeycloakService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-//        log.info("HEADERS" + headers);
         HttpEntity<MultiValueMap<String, String>> request =
                 new HttpEntity<>(body, headers);
-//        log.info("Request" + request);
         return rt.postForObject(tokenUrl, request, TokenResponse.class);
+    }
+
+    public void disableUser(String userId) {
+        UserResource userResource = keycloak.realm(realm)
+                .users()
+                .get(userId);
+
+        UserRepresentation user = userResource.toRepresentation();
+        user.setEnabled(false);
+        userResource.update(user);
+    }
+
+    public void revokeUserSessions(String userId) {
+        keycloak.realm(realm)
+                .users()
+                .get(userId);
+
+
     }
 }

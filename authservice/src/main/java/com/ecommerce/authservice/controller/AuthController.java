@@ -6,15 +6,18 @@ import com.ecommerce.authservice.model.RefreshRequest;
 import com.ecommerce.authservice.model.RegisterRequest;
 import com.ecommerce.authservice.service.AuthService;
 import com.ecommerce.authservice.service.KeycloakLogoutService;
+import com.ecommerce.authservice.service.SuspendedService;
 import com.ecommerce.authservice.util.TokenUtil;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,9 +28,12 @@ public class AuthController {
     private final KeycloakLogoutService logoutService;
     @Autowired
     private TokenUtil tokenUtil;
+    @Autowired
+private final SuspendedService suspendedService;
 
-    public AuthController(KeycloakLogoutService logoutService) {
+    public AuthController(KeycloakLogoutService logoutService, SuspendedService suspendedService) {
         this.logoutService = logoutService;
+        this.suspendedService = suspendedService;
     }
 
     @PostMapping("/admin/register")
@@ -54,12 +60,18 @@ public class AuthController {
     }
 
 
-//    @PostMapping("/logout")
-//    public ResponseEntity<String> logout(@RequestBody LogoutRequest request) {
-//        logoutService.logout(request.getRefresh_token());
-//        return ResponseEntity.ok("Logout successful");
-//    }
+    @PutMapping("/{id}/suspend")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> suspendUser(@PathVariable String id) {
 
+        suspendedService.suspendUser(id);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "User suspended successfully",
+                "userId", id,
+                "status", "SUSPENDED"
+        ));
+    }
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
             @RequestBody LogoutRequest request,
@@ -83,13 +95,13 @@ public class AuthController {
     }
 
 
-    @GetMapping("/api/auth/users")
+    @GetMapping("/users")
     @RolesAllowed("admin")
     public ResponseEntity<List<RegisterRequest>> getAllUsers() {
         return ResponseEntity.ok(s.getAllUsers());
     }
 
-    @DeleteMapping("/api/auth/{id}")
+    @DeleteMapping("/{id}")
     @RolesAllowed("admin")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
 
