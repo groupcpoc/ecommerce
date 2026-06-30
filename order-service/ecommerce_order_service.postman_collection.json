@@ -1,0 +1,630 @@
+{
+  "info": {
+    "name": "E-Commerce Order Service API",
+    "description": "Postman Collection for E-Commerce Order Service — REST APIs routed through API Gateway (port 9090).\n\nIncludes:\n- Keycloak Authentication for Customer, Admin, and Delivery Executive\n- Customer Endpoints (Place, View History, View Specific, Cancel Own)\n- Admin Endpoints (View All, Update Status, Cancel Any, Assign Executive)\n- Delivery Executive Endpoints (View Assigned, Update Delivery Status)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get Bearer Access Token (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set(\"customer_token\", jsonData.access_token);",
+                  "    console.log(\"Customer Access Token successfully stored.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{client_secret}}",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "customer",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_url}}/realms/ecommerce/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_url}}"
+              ],
+              "path": [
+                "realms",
+                "ecommerce",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "description": "Authenticates a Customer against Keycloak and stores the returned Access Token into variable `customer_token`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Bearer Access Token (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set(\"admin_token\", jsonData.access_token);",
+                  "    console.log(\"Admin Access Token successfully stored.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{client_secret}}",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_url}}/realms/ecommerce/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_url}}"
+              ],
+              "path": [
+                "realms",
+                "ecommerce",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "description": "Authenticates an Admin against Keycloak and stores the returned Access Token into variable `admin_token`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Bearer Access Token (Delivery Executive)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set(\"delivery_token\", jsonData.access_token);",
+                  "    console.log(\"Delivery Access Token successfully stored.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{client_secret}}",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "delivery",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_url}}/realms/ecommerce/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_url}}"
+              ],
+              "path": [
+                "realms",
+                "ecommerce",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "description": "Authenticates a Delivery Executive against Keycloak and stores the returned Access Token into variable `delivery_token`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customer Endpoints",
+      "item": [
+        {
+          "name": "Place Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.orderId) {",
+                  "    pm.collectionVariables.set(\"last_order_uuid\", jsonData.orderId);",
+                  "    pm.collectionVariables.set(\"last_order_id\", jsonData.id);",
+                  "    console.log(\"Stored orderId=\" + jsonData.orderId + \", id=\" + jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\"Pizza\", \"Coke\"],\n  \"amount\": 350.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/orders",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "Places a new order for the authenticated Customer."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Orders (Order History)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/orders/me",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "me"
+              ]
+            },
+            "description": "Retrieves the order history of the currently logged-in Customer."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "description": "Retrieves details of a specific order by ID. Customer can only view their own orders."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Own Order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "description": "Cancels an own order if it is in PENDING state. Requires the `CUSTOMER` role."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Endpoints",
+      "item": [
+        {
+          "name": "Get All Orders (System-wide)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/orders",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "Retrieves all orders in the system. Requires the `ADMIN` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/orders/{{last_order_id}}/status",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}",
+                "status"
+              ]
+            },
+            "description": "Updates the status of an order. Requires the `ADMIN` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Any Order (Admin Override)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/orders/{{last_order_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}"
+              ]
+            },
+            "description": "Admin override to cancel any order by ID. Requires the `ADMIN` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Order to Executive",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryExecutiveId\": \"delivery-exec-uuid\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/orders/{{last_order_id}}/assign",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}",
+                "assign"
+              ]
+            },
+            "description": "Assigns an order to a delivery executive. Requires the `ADMIN` role."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Delivery Executive Endpoints",
+      "item": [
+        {
+          "name": "Get Assigned Orders",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{delivery_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/orders/assigned",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "assigned"
+              ]
+            },
+            "description": "Retrieves all orders assigned to the authenticated delivery executive. Requires the `DELIVERY_EXECUTIVE` role."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Delivery Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{delivery_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"OUT_FOR_DELIVERY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/orders/{{last_order_id}}/delivery-status",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{last_order_id}}",
+                "delivery-status"
+              ]
+            },
+            "description": "Updates the status of an assigned order. Allowed values: OUT_FOR_DELIVERY, DELIVERED, DELIVERY_FAILED. Requires the `DELIVERY_EXECUTIVE` role."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "keycloak_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "gateway_url",
+      "value": "http://localhost:9090",
+      "type": "string"
+    },
+    {
+      "key": "client_id",
+      "value": "order-service-client",
+      "type": "string"
+    },
+    {
+      "key": "client_secret",
+      "value": "fyuwhqow0yvl5klntxitiaqggwo2xekn",
+      "type": "string"
+    },
+    {
+      "key": "customer_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "delivery_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_order_uuid",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_order_id",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}

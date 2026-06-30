@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "UserRegisteredEvent",
+  "namespace": "com.ecommerce.events",
+  "fields": [
+    {"name": "userId",    "type": "string"},
+    {"name": "name",      "type": "string"},
+    {"name": "email",     "type": "string"}
+  ]
+}   
