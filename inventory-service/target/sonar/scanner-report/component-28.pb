@@ -1,0 +1,1 @@
+ 2javaXehrHsrc/main/java/com/ecommerce/inventoryservice/mapper/InventoryMapper.java

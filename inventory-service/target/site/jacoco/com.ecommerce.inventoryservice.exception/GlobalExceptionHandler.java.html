@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">inventory-service</a> &gt; <a href="index.source.html" class="el_package">com.ecommerce.inventoryservice.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.ecommerce.inventoryservice.exception;
+
+import java.util.stream.Collectors;
+
+import com.ecommerce.inventoryservice.dto.ApiResponse;
+import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+@RestControllerAdvice
+<span class="fc" id="L21">public class GlobalExceptionHandler {</span>
+
+<span class="fc" id="L23">    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);</span>
+
+    @ExceptionHandler(InventoryNotFoundException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleNotFound(InventoryNotFoundException ex) {
+<span class="fc" id="L27">        return ResponseEntity.ok(ApiResponse.failure(ex.getMessage(), &quot;INVENTORY_NOT_FOUND&quot;, null));</span>
+    }
+
+    @ExceptionHandler(InventoryDomainException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleDomain(InventoryDomainException ex) {
+<span class="fc" id="L32">        return ResponseEntity.ok(ApiResponse.failure(ex.getMessage(), &quot;INVENTORY_OPERATION_FAILED&quot;, null));</span>
+    }
+
+    @ExceptionHandler(OrderStockNotFoundException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleOrderStockNotFound(OrderStockNotFoundException ex) {
+<span class="fc" id="L37">        return ResponseEntity.ok(ApiResponse.failure(ex.getMessage(), &quot;ORDER_STOCK_NOT_FOUND&quot;, null));</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleValidation(MethodArgumentNotValidException ex) {
+<span class="fc" id="L42">        String message = ex.getBindingResult().getFieldErrors().stream()</span>
+<span class="fc" id="L43">                .map(fieldError -&gt; fieldError.getField() + &quot;: &quot; + fieldError.getDefaultMessage())</span>
+<span class="fc" id="L44">                .collect(Collectors.joining(&quot;, &quot;));</span>
+<span class="fc" id="L45">        return ResponseEntity.ok(ApiResponse.failure(message, &quot;VALIDATION_ERROR&quot;, null));</span>
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleConstraintViolation(ConstraintViolationException ex) {
+<span class="fc" id="L50">        return ResponseEntity.ok(ApiResponse.failure(ex.getMessage(), &quot;VALIDATION_ERROR&quot;, null));</span>
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleBadRequest(Exception ex) {
+<span class="fc" id="L55">        return ResponseEntity.ok(ApiResponse.failure(&quot;Invalid request payload&quot;, &quot;VALIDATION_ERROR&quot;, null));</span>
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleMissingParameter(MissingServletRequestParameterException ex) {
+<span class="fc" id="L60">        return ResponseEntity.ok(ApiResponse.failure(</span>
+<span class="fc" id="L61">                &quot;Missing required request parameter: &quot; + ex.getParameterName(),</span>
+                &quot;VALIDATION_ERROR&quot;,
+                null));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+<span class="fc" id="L68">        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)</span>
+<span class="fc" id="L69">                .body(ApiResponse.failure(&quot;Method not allowed&quot;, &quot;METHOD_NOT_ALLOWED&quot;, null));</span>
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleNoResourceFound(NoResourceFoundException ex) {
+<span class="fc" id="L74">        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L75">                .body(ApiResponse.failure(&quot;Resource not found&quot;, &quot;RESOURCE_NOT_FOUND&quot;, null));</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; handleUnexpected(Exception ex) {
+<span class="fc" id="L80">        log.error(&quot;Unexpected error occurred&quot;, ex);</span>
+<span class="fc" id="L81">        String message = ex.getMessage();</span>
+<span class="fc" id="L82">        return ResponseEntity.ok(ApiResponse.failure(</span>
+<span class="fc bfc" id="L83" title="All 4 branches covered.">                message == null || message.isBlank() ? &quot;Unexpected error occurred&quot; : message,</span>
+                &quot;UNEXPECTED_ERROR&quot;,
+                null));
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

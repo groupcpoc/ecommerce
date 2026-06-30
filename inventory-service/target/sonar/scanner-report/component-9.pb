@@ -1,0 +1,1 @@
+	 2javaXYhrNsrc/main/java/com/ecommerce/inventoryservice/dto/InventorySummaryResponse.java

@@ -1,0 +1,6 @@
+projectKey=com.ecommerce:inventory-service
+serverUrl=http://localhost:9000
+serverVersion=26.6.0.123539
+dashboardUrl=http://localhost:9000/dashboard?id=com.ecommerce%3Ainventory-service
+ceTaskId=f0597763-cd93-4f8e-808d-cb5aa39c9247
+ceTaskUrl=http://localhost:9000/api/ce/task?id=f0597763-cd93-4f8e-808d-cb5aa39c9247

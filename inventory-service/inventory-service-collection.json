@@ -1,0 +1,308 @@
+{
+	"info": {
+		"_postman_id": "8fdfda81-79b8-4c12-990a-113b2c12cd02",
+		"name": "Inventory Service API Collection",
+		"description": "Collection of APIs for the Inventory Microservice in the E-Commerce Architecture.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Admin Endpoints",
+			"item": [
+				{
+					"name": "Create Inventory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"PROD-001\",\n  \"productName\": \"Wireless Mouse\",\n  \"totalQuantity\": 100,\n  \"lowStockThreshold\": 10,\n  \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{GATEWAY_URL}}/api/inventory",
+							"host": [
+								"{{GATEWAY_URL}}"
+							],
+							"path": [
+								"api",
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Inventory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productName\": \"Wireless Mouse RGB\",\n  \"totalQuantity\": 150,\n  \"lowStockThreshold\": 15,\n  \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{GATEWAY_URL}}/api/inventory/PROD-001",
+							"host": [
+								"{{GATEWAY_URL}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"PROD-001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restock Inventory (POST Body)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 50,\n  \"note\": \"Regular replenishment\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{GATEWAY_URL}}/api/inventory/PROD-001/restock",
+							"host": [
+								"{{GATEWAY_URL}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"PROD-001",
+								"restock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Restock Inventory (GET Query)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{GATEWAY_URL}}/api/inventory/PROD-001/restock?quantity=25&note=emergency+restock",
+							"host": [
+								"{{GATEWAY_URL}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"PROD-001",
+								"restock"
+							],
+							"query": [
+								{
+									"key": "quantity",
+									"value": "25"
+								},
+								{
+									"key": "note",
+									"value": "emergency restock"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Inventory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{GATEWAY_URL}}/api/inventory",
+							"host": [
+								"{{GATEWAY_URL}}"
+							],
+							"path": [
+								"api",
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Low Stock Inventory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{GATEWAY_URL}}/api/inventory/low-stock",
+							"host": [
+								"{{GATEWAY_URL}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"low-stock"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customer / Common Endpoints",
+			"item": [
+				{
+					"name": "Get Inventory by Product ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{GATEWAY_URL}}/api/inventory/PROD-001",
+							"host": [
+								"{{GATEWAY_URL}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"PROD-001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Stock by Order ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ACCESS_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{GATEWAY_URL}}/api/inventory/order/ORD-9001",
+							"host": [
+								"{{GATEWAY_URL}}"
+							],
+							"path": [
+								"api",
+								"inventory",
+								"order",
+								"ORD-9001"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [],
+	"variable": [
+		{
+			"key": "GATEWAY_URL",
+			"value": "http://localhost:9090",
+			"type": "string"
+		},
+		{
+			"key": "DIRECT_URL",
+			"value": "http://localhost:8088",
+			"type": "string"
+		},
+		{
+			"key": "ACCESS_TOKEN",
+			"value": "your-keycloak-bearer-token-here",
+			"type": "string"
+		}
+	]
+}

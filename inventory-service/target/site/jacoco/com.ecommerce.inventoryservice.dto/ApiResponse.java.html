@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">inventory-service</a> &gt; <a href="index.source.html" class="el_package">com.ecommerce.inventoryservice.dto</a> &gt; <span class="el_source">ApiResponse.java</span></div><h1>ApiResponse.java</h1><pre class="source lang-java linenums">package com.ecommerce.inventoryservice.dto;
+
+import java.time.LocalDateTime;
+
+public class ApiResponse&lt;T&gt; {
+
+    private boolean success;
+    private String message;
+    private T data;
+    private LocalDateTime timestamp;
+    private String errorCode;
+
+<span class="fc" id="L13">    public ApiResponse() {</span>
+<span class="fc" id="L14">    }</span>
+
+<span class="fc" id="L16">    public ApiResponse(boolean success, String message, T data, LocalDateTime timestamp, String errorCode) {</span>
+<span class="fc" id="L17">        this.success = success;</span>
+<span class="fc" id="L18">        this.message = message;</span>
+<span class="fc" id="L19">        this.data = data;</span>
+<span class="fc" id="L20">        this.timestamp = timestamp;</span>
+<span class="fc" id="L21">        this.errorCode = errorCode;</span>
+<span class="fc" id="L22">    }</span>
+
+    public static &lt;T&gt; ApiResponse&lt;T&gt; success(String message, T data) {
+<span class="fc" id="L25">        return new ApiResponse&lt;&gt;(true, message, data, LocalDateTime.now(), &quot;&quot;);</span>
+    }
+
+    public static &lt;T&gt; ApiResponse&lt;T&gt; failure(String message, String errorCode, T data) {
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        return new ApiResponse&lt;&gt;(false, message, data, LocalDateTime.now(), errorCode == null ? &quot;&quot; : errorCode);</span>
+    }
+
+    public boolean isSuccess() {
+<span class="fc" id="L33">        return success;</span>
+    }
+
+    public void setSuccess(boolean success) {
+<span class="fc" id="L37">        this.success = success;</span>
+<span class="fc" id="L38">    }</span>
+
+    public String getMessage() {
+<span class="fc" id="L41">        return message;</span>
+    }
+
+    public void setMessage(String message) {
+<span class="fc" id="L45">        this.message = message;</span>
+<span class="fc" id="L46">    }</span>
+
+    public T getData() {
+<span class="fc" id="L49">        return data;</span>
+    }
+
+    public void setData(T data) {
+<span class="fc" id="L53">        this.data = data;</span>
+<span class="fc" id="L54">    }</span>
+
+    public LocalDateTime getTimestamp() {
+<span class="fc" id="L57">        return timestamp;</span>
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+<span class="fc" id="L61">        this.timestamp = timestamp;</span>
+<span class="fc" id="L62">    }</span>
+
+    public String getErrorCode() {
+<span class="fc" id="L65">        return errorCode;</span>
+    }
+
+    public void setErrorCode(String errorCode) {
+<span class="fc" id="L69">        this.errorCode = errorCode;</span>
+<span class="fc" id="L70">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

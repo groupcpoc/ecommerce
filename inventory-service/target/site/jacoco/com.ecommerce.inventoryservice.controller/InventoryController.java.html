@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InventoryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">inventory-service</a> &gt; <a href="index.source.html" class="el_package">com.ecommerce.inventoryservice.controller</a> &gt; <span class="el_source">InventoryController.java</span></div><h1>InventoryController.java</h1><pre class="source lang-java linenums">package com.ecommerce.inventoryservice.controller;
+
+import java.util.List;
+
+import com.ecommerce.inventoryservice.dto.ApiResponse;
+import com.ecommerce.inventoryservice.dto.InventoryCreateRequest;
+import com.ecommerce.inventoryservice.dto.InventoryResponse;
+import com.ecommerce.inventoryservice.dto.InventorySummaryResponse;
+import com.ecommerce.inventoryservice.dto.InventoryUpdateRequest;
+import com.ecommerce.inventoryservice.dto.OrderStockResponse;
+import com.ecommerce.inventoryservice.dto.RestockRequest;
+import com.ecommerce.inventoryservice.service.InventoryService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(&quot;/api/inventory&quot;)
+@Validated
+public class
+InventoryController {
+
+    private final InventoryService inventoryService;
+
+<span class="fc" id="L34">    public InventoryController(InventoryService inventoryService) {</span>
+<span class="fc" id="L35">        this.inventoryService = inventoryService;</span>
+<span class="fc" id="L36">    }</span>
+
+    @GetMapping
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;InventorySummaryResponse&gt;&gt;&gt; getAllInventory() {
+<span class="fc" id="L40">        return ResponseEntity.ok(ApiResponse.success(&quot;Inventory fetched successfully&quot;, inventoryService.getAllInventory()));</span>
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;ApiResponse&lt;InventoryResponse&gt;&gt; createInventory(@Valid @RequestBody InventoryCreateRequest request) {
+<span class="fc" id="L45">        return ResponseEntity.ok(ApiResponse.success(&quot;Inventory created successfully&quot;,</span>
+<span class="fc" id="L46">                inventoryService.createInventory(request)));</span>
+    }
+
+    @GetMapping(&quot;/{productId}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;InventoryResponse&gt;&gt; getInventoryByProductId(
+            @PathVariable @NotBlank String productId) {
+<span class="fc" id="L52">        return ResponseEntity.ok(ApiResponse.success(&quot;Inventory fetched successfully&quot;, inventoryService.getInventory(productId)));</span>
+    }
+
+    @PutMapping(&quot;/{productId}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;InventoryResponse&gt;&gt; updateInventory(
+            @PathVariable @NotBlank String productId,
+            @Valid @RequestBody InventoryUpdateRequest request) {
+<span class="fc" id="L59">        return ResponseEntity.ok(ApiResponse.success(&quot;Inventory updated successfully&quot;,</span>
+<span class="fc" id="L60">                inventoryService.updateInventory(productId, request)));</span>
+    }
+
+    @PostMapping(&quot;/{productId}/restock&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;InventoryResponse&gt;&gt; restockInventory(
+            @PathVariable @NotBlank String productId,
+            @Valid @RequestBody RestockRequest request) {
+<span class="fc" id="L67">        return ResponseEntity.ok(ApiResponse.success(&quot;Inventory restocked successfully&quot;,</span>
+<span class="fc" id="L68">                inventoryService.restock(productId, request)));</span>
+    }
+
+    @GetMapping(&quot;/{productId}/restock&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;InventoryResponse&gt;&gt; restockInventoryFromQuery(
+            @PathVariable @NotBlank String productId,
+            @RequestParam Integer quantity,
+            @RequestParam(required = false) String note) {
+<span class="fc" id="L76">        RestockRequest request = new RestockRequest();</span>
+<span class="fc" id="L77">        request.setQuantity(quantity);</span>
+<span class="fc" id="L78">        request.setNote(note);</span>
+<span class="fc" id="L79">        return ResponseEntity.ok(ApiResponse.success(&quot;Inventory restocked successfully&quot;,</span>
+<span class="fc" id="L80">                inventoryService.restock(productId, request)));</span>
+    }
+
+    @GetMapping(&quot;/low-stock&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;List&lt;InventorySummaryResponse&gt;&gt;&gt; getLowStockInventory() {
+<span class="fc" id="L85">        return ResponseEntity.ok(ApiResponse.success(&quot;Low stock inventory fetched successfully&quot;,</span>
+<span class="fc" id="L86">                inventoryService.getLowStockInventory()));</span>
+    }
+
+    @GetMapping(&quot;/order/{orderId}&quot;)
+    public ResponseEntity&lt;ApiResponse&lt;OrderStockResponse&gt;&gt; getOrderStock(
+            @PathVariable @NotBlank String orderId) {
+<span class="fc" id="L92">        return ResponseEntity.ok(ApiResponse.success(&quot;Order stock fetched successfully&quot;,</span>
+<span class="fc" id="L93">                inventoryService.getOrderStock(orderId)));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

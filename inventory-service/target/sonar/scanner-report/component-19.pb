@@ -1,0 +1,1 @@
+ 2javaXGhrFsrc/main/java/com/ecommerce/inventoryservice/event/InventoryEvent.java
