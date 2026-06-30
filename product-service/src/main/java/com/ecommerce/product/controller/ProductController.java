@@ -3,7 +3,7 @@ package com.ecommerce.product.controller;
 import com.ecommerce.product.dto.ProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
 import com.ecommerce.product.enums.ProductStatus;
-import com.ecommerce.product.model.Product;
+import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.ecommerce.product.consumer;
 
-import com.ecommerce.product.model.Product;
+import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.repository.ProductRepository;
 import com.ecommerce.product.enums.ProductStatus;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -4,7 +4,7 @@ import com.ecommerce.product.dto.ProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
 import com.ecommerce.product.enums.ProductStatus;
 import com.ecommerce.product.exception.ProductNotFoundException;
-import com.ecommerce.product.model.Product;
+import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.ecommerce.product.model;
+package com.ecommerce.product.entity;
 
 import com.ecommerce.product.enums.ProductStatus;
 import jakarta.persistence.*;
