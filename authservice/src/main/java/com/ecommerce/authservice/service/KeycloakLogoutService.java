@@ -18,9 +18,9 @@ public class KeycloakLogoutService {
     private final RestTemplate restTemplate = new RestTemplate();
     @Value("${keycloak.logout-url}")
     private String logoutUrl;
-    @Value("${keycloak.client-id}")
+    @Value("${keycloak.client_id}")
     private String clientId;
-    @Value("${keycloak.client-secret}")
+    @Value("${keycloak.client_secret}")
     private String clientSecret;
 
     public void logout(String refreshtoken) {

@@ -1,9 +1,6 @@
 package com.ecommerce.authservice.controller;
 
-import com.ecommerce.authservice.model.LoginRequest;
-import com.ecommerce.authservice.model.LogoutRequest;
-import com.ecommerce.authservice.model.RefreshRequest;
-import com.ecommerce.authservice.model.RegisterRequest;
+import com.ecommerce.authservice.model.*;
 import com.ecommerce.authservice.service.AuthService;
 import com.ecommerce.authservice.service.KeycloakLogoutService;
 import com.ecommerce.authservice.service.SuspendedService;
@@ -22,47 +19,58 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-@Autowired
-    private AuthService s;
     @Autowired
+    private AuthService s;
+    //    @Autowired
     private final KeycloakLogoutService logoutService;
     @Autowired
     private TokenUtil tokenUtil;
-    @Autowired
-private final SuspendedService suspendedService;
+    //    @Autowired
+    private final SuspendedService suspendedService;
 
     public AuthController(KeycloakLogoutService logoutService, SuspendedService suspendedService) {
         this.logoutService = logoutService;
         this.suspendedService = suspendedService;
     }
 
+    @GetMapping("/get/usr")
+    public ResponseEntity<String> fetchStringUser() {
+        return ResponseEntity.ok("user is available");
+    }
+
+    @PostMapping("/post/usr")
+    public ResponseEntity<String> StringUser(@RequestBody String s) {
+        return ResponseEntity.ok(s + " is saving in database");
+    }
+
     @PostMapping("/admin/register")
     @RolesAllowed("admin")
-    public ResponseEntity<?> registerAdmin(@RequestBody RegisterRequest r) {
+    public ResponseEntity<String> registerAdmin(@RequestBody RegisterRequest r) {
         return ResponseEntity.ok(s.registerAdmin(r, "admin"));
     }
 
     @PostMapping("/user/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest r) {
-        return ResponseEntity.ok(s.registerUser(r, "user"));
+    public ResponseEntity<String> registerUser(@RequestBody RegisterRequest r) {
+        return ResponseEntity.ok(s.userRegistration(r, "user"));
     }
 
-    @PostMapping("/login")
+    //    @PreAuthorize("hasRole('user')")
+    @PostMapping("/user/login")
     @RolesAllowed("user")
-    public ResponseEntity<?> login(@RequestBody LoginRequest r) {
+    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest r) {
 
         return ResponseEntity.ok(s.login(r));
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/user/refresh")
     public ResponseEntity<?> refresh(@RequestBody RefreshRequest r) {
         return ResponseEntity.ok(s.refresh(r));
     }
 
 
     @PutMapping("/{id}/suspend")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> suspendUser(@PathVariable String id) {
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<Map<String, String>> suspendUser(@PathVariable String id) {
 
         suspendedService.suspendUser(id);
 
@@ -72,8 +80,9 @@ private final SuspendedService suspendedService;
                 "status", "SUSPENDED"
         ));
     }
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(
+
+    @PostMapping("/user/logout")
+    public ResponseEntity<String> logout(
             @RequestBody LogoutRequest request,
             HttpServletRequest httpRequest) {
 
@@ -102,7 +111,7 @@ private final SuspendedService suspendedService;
     }
 
     @DeleteMapping("/{id}")
-    @RolesAllowed("admin")
+    @PreAuthorize("admin")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
 
         s.deleteUser(id);

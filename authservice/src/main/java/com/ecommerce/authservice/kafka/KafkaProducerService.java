@@ -15,9 +15,12 @@ public class KafkaProducerService {
 
     public void publish(RegisterRequest r, String role) {
         kafka.send("user.registered", r);
+        kafka.send("user.notify","User registration completed");
     }
 
     public void publishUserSuspended(SuspendedRequest event) {
+
         kafka.send("user.suspended",event);
+        kafka.send("user.notify","Request successfully suspended");
     }
 }

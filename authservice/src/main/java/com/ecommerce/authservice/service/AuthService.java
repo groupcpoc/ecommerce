@@ -32,7 +32,7 @@ public class AuthService {
         return " Admin User Registered";
     }
 
-    public String registerUser(RegisterRequest r, String role) {
+    public String userRegistration(RegisterRequest r, String role) {
         k.createUser(r, "user");
         kafka.publish(r, "user");
         return "User Registered";
@@ -43,17 +43,20 @@ public class AuthService {
     }
 
     public TokenResponse refresh(RefreshRequest r) {
+        kafkaTemplate.send("user.notify",r.refresh_token);
         return k.refresh(r.refresh_token);
     }
 
-    @KafkaListener(topics = "user-fetch", groupId = "user.register")
+    @KafkaListener(topics = "user-fetch", groupId = "user-service-group")
     public List<RegisterRequest> getAllUsers() {
         List<RegisterRequest> list = kafkaConsumerService.getUserFromConsumer();
+        kafkaTemplate.send("user.notify","Fetching User List");
         return list.stream().sorted().collect(Collectors.toList());
 
     }
 
     public void deleteUser(Long id) {
         kafkaTemplate.send("user.deleted", "Deleted user id: " + id);
+        kafkaTemplate.send("user.notify", "Deleted user id: " + id);
     }
 }

@@ -16,7 +16,7 @@ public class KafkaConsumerService {
 //    private static final Logger log = (Logger) LogFactory.getLog(KafkaConsumerService.class);
     List<RegisterRequest> registerRequestList = new ArrayList<>();
 
-    @KafkaListener(topics = "user-fetch", groupId = "user.register")
+    @KafkaListener(topics = "user-fetch", groupId = "user-service-group")
     public void consume(RegisterRequest request) {
 
 //        log.info("userlist" + request);

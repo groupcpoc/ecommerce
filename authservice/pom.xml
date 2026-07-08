@@ -39,6 +39,17 @@
             <artifactId>spring-boot-starter-logging</artifactId>
             <version>3.4.6</version>
         </dependency>
+        <!-- Bean Validation (Hibernate Validator) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- Eureka Client (Service Discovery) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <version>4.2.1</version>
+        </dependency>
         <!--        <dependency>-->
         <!--            <groupId>org.hibernate.orm</groupId>-->
         <!--            <artifactId>hibernate-core</artifactId>-->

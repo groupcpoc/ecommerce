@@ -13,19 +13,22 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class SecurityConfig {
+    private static final String admin ="admin";
+    private static final String user ="user";
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/user").permitAll()
-                        .requestMatchers("api/auth/admin").permitAll()
-                        .requestMatchers("/api/auth/admin/register").hasRole("admin")
-                        .requestMatchers("/api/auth/user").hasRole("admin")
-                        .requestMatchers("/api/auth/{id}").hasRole("admin")
-                        .requestMatchers("/api/auth/user/register").hasRole("user")
-                        .requestMatchers("/api/auth/users/*/suspend").hasRole("admin")
-                        .requestMatchers("/api/auth/login").authenticated()
-                        .requestMatchers("/api/auth/logout").authenticated()
+                        .requestMatchers("/api/auth/admin").permitAll()
+                        .requestMatchers("/api/auth/admin/register").hasRole(admin)
+                        .requestMatchers("/api/auth/user").hasRole(user)
+                        .requestMatchers("/api/auth/user/login").authenticated()
+                        .requestMatchers("/api/auth/{id}").hasRole(admin)
+                        .requestMatchers("/api/auth/user/register").permitAll()
+                        .requestMatchers("/api/auth/user/refresh").permitAll()
+                        .requestMatchers("/api/auth/users/{id}/suspend").hasRole(admin)
+                        .requestMatchers("/api/auth/user/logout").authenticated()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(jwtConverter())));
         return http.build();
