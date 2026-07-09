@@ -421,15 +421,14 @@
               }
             },
             "url": {
-              "raw": "{{gateway_url}}/api/orders/{{last_order_id}}/status",
+              "raw": "{{gateway_url}}/api/orders/{{last_order_id}}",
               "host": [
                 "{{gateway_url}}"
               ],
               "path": [
                 "api",
                 "orders",
-                "{{last_order_id}}",
-                "status"
+                "{{last_order_id}}"
               ]
             },
             "description": "Updates the status of an order. Requires the `ADMIN` role."
@@ -602,7 +601,7 @@
     },
     {
       "key": "client_secret",
-      "value": "FYUWhqOw0yVL5kLNTxitIaQgGWo2xekn",
+      "value": "FYUWhqOw0yVL5kLNTxitlaQgGWo2xekn",
       "type": "string"
     },
     {

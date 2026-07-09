@@ -103,7 +103,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8080/realms/ecommerce || exit 1" ]
+      test: [ "CMD", "/bin/sh", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/8080" ]
       interval: 30s
       timeout: 10s
       retries: 10

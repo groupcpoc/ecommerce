@@ -105,7 +105,7 @@ class OrderControllerTest {
 
         when(orderService.updateOrderStatus(eq(1L), eq(OrderStatus.CONFIRMED))).thenReturn(response);
 
-        mockMvc.perform(put("/api/orders/1/status")
+        mockMvc.perform(put("/api/orders/1")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

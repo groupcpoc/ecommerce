@@ -80,13 +80,13 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
-    @PutMapping("/{id}/status")
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderResponseDto> updateOrderStatus(
             @PathVariable Long id,
             @Valid @RequestBody StatusUpdateRequestDto requestDto) {
 
-        log.info("PUT /api/orders/{}/status — newStatus={}", id, requestDto.getStatus());
+        log.info("PUT /api/orders/{} — newStatus={}", id, requestDto.getStatus());
         return ResponseEntity.ok(orderService.updateOrderStatus(id, requestDto.getStatus()));
     }
 

@@ -1,0 +1,157 @@
+{
+  "id": "ecommerce",
+  "realm": "ecommerce",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin"
+      },
+      {
+        "name": "user"
+      },
+      {
+        "name": "customer"
+      },
+      {
+        "name": "delivery_executive"
+      },
+      {
+        "name": "ADMIN"
+      },
+      {
+        "name": "CUSTOMER"
+      },
+      {
+        "name": "DELIVERY_EXECUTIVE"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "authservice-client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "authservice-client",
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "publicClient": false,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true
+    },
+    {
+      "clientId": "order-service-client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "FYUWhqOw0yVL5kLNTxitlaQgGWo2xekn",
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "publicClient": false,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "admin@ecommerce.com",
+      "enabled": true,
+      "email": "admin@ecommerce.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin",
+        "ADMIN"
+      ]
+    },
+    {
+      "username": "user@ecommerce.com",
+      "enabled": true,
+      "email": "user@ecommerce.com",
+      "firstName": "Regular",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "customer",
+        "CUSTOMER"
+      ]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin_pwd@ecommerce.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin",
+        "ADMIN"
+      ]
+    },
+    {
+      "username": "delivery",
+      "enabled": true,
+      "email": "delivery@ecommerce.com",
+      "firstName": "Delivery",
+      "lastName": "Executive",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "delivery_executive",
+        "DELIVERY_EXECUTIVE"
+      ]
+    },
+    {
+      "username": "customer",
+      "enabled": true,
+      "email": "customer@ecommerce.com",
+      "firstName": "Customer",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "customer",
+        "CUSTOMER"
+      ]
+    }
+  ]
+}
