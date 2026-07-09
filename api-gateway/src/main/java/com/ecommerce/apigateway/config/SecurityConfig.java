@@ -35,69 +35,85 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/actuator/**").permitAll()
-                        
-                        // Auth service
-                        // Public
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/register").permitAll()
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/login").permitAll()
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/refresh").permitAll()
-                        // Admin
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/users").hasRole("ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/auth/users/**").hasRole("ADMIN")
-                        .pathMatchers("/api/auth/**").denyAll()
 
+                        .pathMatchers("/actuator/**").permitAll()
                         // Product service
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/search").hasRole("CUSTOMER")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/categories").hasRole("CUSTOMER")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products").hasRole("CUSTOMER")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/*").hasRole("CUSTOMER")
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/products").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/search")
+                        .hasRole("CUSTOMER")
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/categories")
+                        .hasRole("CUSTOMER")
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/product").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
                         .pathMatchers("/api/products/**").denyAll()
-
                         // Notification service
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/notifications").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/notifications/**").hasRole("ADMIN")
                         .pathMatchers("/api/notifications/**").denyAll()
-
                         // Inventory service
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/low-stock").hasRole("ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/order/*").hasRole("DELIVERY_EXECUTIVE")
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/inventory/*/restock").hasRole("ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/*/restock").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory").hasRole("ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/inventory").hasRole("ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/*").hasAnyRole("CUSTOMER", "ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/*").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/inventory/*").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/inventory/*/restock")
+                        .hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/low-stock")
+                        .hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/inventory/order/*")
+                        .hasRole("DELIVERY_EXECUTIVE")
                         .pathMatchers("/api/inventory/**").denyAll()
-
                         // Payment service — specific rules
-                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/*/refund")
+                        .hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments/me").hasRole("CUSTOMER")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/payments/**").hasRole("CUSTOMER")
                         .pathMatchers("/api/payments/**").denyAll()
 
                         // Order service
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/assigned").hasRole("DELIVERY_EXECUTIVE")
-                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/delivery-status").hasRole("DELIVERY_EXECUTIVE")
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/assigned")
+                        .hasRole("DELIVERY_EXECUTIVE")
+                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/delivery-status")
+                        .hasRole("DELIVERY_EXECUTIVE")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/me").hasRole("CUSTOMER")
-                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/status").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/assign").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/orders").hasRole("CUSTOMER")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders").hasRole("ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/*").hasAnyRole("CUSTOMER", "ADMIN")
-                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/orders/*").hasAnyRole("CUSTOMER", "ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/*")
+                        .hasAnyRole("CUSTOMER", "ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/orders/*")
+                        .hasAnyRole("CUSTOMER", "ADMIN")
                         .pathMatchers("/api/orders/**").denyAll()
 
                         // User service
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/users/me").hasRole("CUSTOMER")
-                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/me").hasRole("CUSTOMER")
-                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/users").hasRole("ADMIN")
-                        .pathMatchers("/api/users/**").denyAll()
 
+                        // Customer
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/users/me")
+                        .hasRole("CUSTOMER")
+
+                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/me")
+                        .hasRole("CUSTOMER")
+
+                        // Admin
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/users")
+                        .hasRole("ADMIN")
+
+                        .pathMatchers("/api/users/**").denyAll()
+                        // Auth service
+
+                        // Public
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/register").permitAll()
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/login").permitAll()
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/refresh").permitAll()
+
+                        // Admin
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/users").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/auth/users/**").hasRole("ADMIN")
+
+                        .pathMatchers("/api/auth/**").denyAll()
                         .anyExchange().authenticated())
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(customAccessDeniedHandler)
@@ -114,34 +130,14 @@ public class SecurityConfig {
     }
 
     private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
-        java.util.Set<String> rolesSet = new java.util.HashSet<>();
-
-        // 1. Try extracting from standard "roles" claim
         List<String> roles = jwt.getClaimAsStringList("roles");
-        if (roles != null) {
-            rolesSet.addAll(roles);
+        System.out.println("Extracted roles claim: " + roles);
+
+        if (roles == null) {
+            return List.of();
         }
-
-        // 2. Try extracting from realm_access.roles claim (standard Keycloak)
-        java.util.Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
-        if (realmAccess != null && realmAccess.containsKey("roles")) {
-            @SuppressWarnings("unchecked")
-            List<String> realmRoles = (List<String>) realmAccess.get("roles");
-            if (realmRoles != null) {
-                rolesSet.addAll(realmRoles);
-            }
-        }
-
-        System.out.println("Extracted roles claims: " + rolesSet);
-
-        return rolesSet.stream()
-                .map(role -> {
-                    String formatted = role.toUpperCase();
-                    if (!formatted.startsWith("ROLE_")) {
-                        formatted = "ROLE_" + formatted;
-                    }
-                    return new SimpleGrantedAuthority(formatted);
-                })
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 }
