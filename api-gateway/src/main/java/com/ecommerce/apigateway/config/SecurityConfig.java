@@ -78,7 +78,7 @@ public class SecurityConfig {
                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/delivery-status")
                         .hasRole("DELIVERY_EXECUTIVE")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/me").hasRole("CUSTOMER")
-                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/status").hasRole("ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/assign").hasRole("ADMIN")
                         .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/orders").hasRole("CUSTOMER")
                         .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/orders").hasRole("ADMIN")
