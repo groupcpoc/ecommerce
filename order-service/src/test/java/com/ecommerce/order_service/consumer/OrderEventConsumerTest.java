@@ -6,7 +6,6 @@ import com.ecommerce.order_service.repository.OrderRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -50,6 +49,12 @@ class OrderEventConsumerTest {
     }
 
     @Test
+    void handlePaymentFailed_NullOrderId() {
+        consumer.handlePaymentFailed("{}");
+        verify(orderRepository, never()).findByOrderId(anyString());
+    }
+
+    @Test
     void handleInventoryFailed_Success() {
         Order order = Order.builder().orderId("uuid-123").status(OrderStatus.PENDING).build();
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
@@ -59,6 +64,12 @@ class OrderEventConsumerTest {
 
         assertEquals(OrderStatus.CANCELLED, order.getStatus());
         verify(orderRepository).save(order);
+    }
+
+    @Test
+    void handleInventoryFailed_NullOrderId() {
+        consumer.handleInventoryFailed("{}");
+        verify(orderRepository, never()).findByOrderId(anyString());
     }
 
     @Test
@@ -74,6 +85,12 @@ class OrderEventConsumerTest {
     }
 
     @Test
+    void handleInventoryReserved_NullOrderId() {
+        consumer.handleInventoryReserved("{}");
+        verify(orderRepository, never()).findByOrderId(anyString());
+    }
+
+    @Test
     void updateOrderStatus_OrderNotFound() {
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.empty());
 
@@ -85,6 +102,16 @@ class OrderEventConsumerTest {
     @Test
     void updateOrderStatus_TerminalState_Skips() {
         Order order = Order.builder().orderId("uuid-123").status(OrderStatus.CANCELLED).build();
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
+
+        consumer.handleInventoryReserved("{\"orderId\":\"uuid-123\"}");
+
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    void updateOrderStatus_TerminalState_Delivered_Skips() {
+        Order order = Order.builder().orderId("uuid-123").status(OrderStatus.DELIVERED).build();
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         consumer.handleInventoryReserved("{\"orderId\":\"uuid-123\"}");

@@ -305,4 +305,115 @@ class OrderServiceImplTest {
                 orderService.updateDeliveryStatus(1L, OrderStatus.DELIVERY_FAILED, "exec-1")
         );
     }
+
+    @Test
+    void updateDeliveryStatus_Success_Placeholder() {
+        Order order = Order.builder()
+                .deliveryExecutiveId("delivery-exec-uuid")
+                .status(OrderStatus.CONFIRMED)
+                .build();
+        OrderResponseDto dto = new OrderResponseDto();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+        when(orderMapper.toResponseDto(order)).thenReturn(dto);
+
+        OrderResponseDto result = orderService.updateDeliveryStatus(1L, OrderStatus.OUT_FOR_DELIVERY, "exec-1");
+
+        assertSame(dto, result);
+        assertEquals(OrderStatus.OUT_FOR_DELIVERY, order.getStatus());
+    }
+
+    @Test
+    void updateDeliveryStatus_ExecutiveNull() {
+        Order order = Order.builder().deliveryExecutiveId(null).build();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        assertThrows(AccessDeniedException.class, () -> 
+                orderService.updateDeliveryStatus(1L, OrderStatus.OUT_FOR_DELIVERY, "exec-1")
+        );
+    }
+
+    @Test
+    void updateDeliveryStatus_Success_Delivered() {
+        Order order = Order.builder()
+                .deliveryExecutiveId("exec-1")
+                .status(OrderStatus.CONFIRMED)
+                .build();
+        OrderResponseDto dto = new OrderResponseDto();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+        when(orderMapper.toResponseDto(order)).thenReturn(dto);
+
+        OrderResponseDto result = orderService.updateDeliveryStatus(1L, OrderStatus.DELIVERED, "exec-1");
+
+        assertSame(dto, result);
+        assertEquals(OrderStatus.DELIVERED, order.getStatus());
+    }
+
+    @Test
+    void updateDeliveryStatus_Success_DeliveryFailed() {
+        Order order = Order.builder()
+                .deliveryExecutiveId("exec-1")
+                .status(OrderStatus.CONFIRMED)
+                .build();
+        OrderResponseDto dto = new OrderResponseDto();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+        when(orderMapper.toResponseDto(order)).thenReturn(dto);
+
+        OrderResponseDto result = orderService.updateDeliveryStatus(1L, OrderStatus.DELIVERY_FAILED, "exec-1");
+
+        assertSame(dto, result);
+        assertEquals(OrderStatus.DELIVERY_FAILED, order.getStatus());
+    }
+
+    @Test
+    void updateDeliveryStatus_InvalidState_Cancelled() {
+        Order order = Order.builder()
+                .deliveryExecutiveId("exec-1")
+                .status(OrderStatus.CANCELLED)
+                .build();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        assertThrows(InvalidOrderStateException.class, () -> 
+                orderService.updateDeliveryStatus(1L, OrderStatus.OUT_FOR_DELIVERY, "exec-1")
+        );
+    }
+
+    @Test
+    void updateOrderStatus_InvalidState_Cancelled() {
+        Order order = Order.builder().status(OrderStatus.CANCELLED).build();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        assertThrows(InvalidOrderStateException.class, () -> 
+                orderService.updateOrderStatus(1L, OrderStatus.CONFIRMED)
+        );
+    }
+
+    @Test
+    void assignOrderToDeliveryExecutive_InvalidState_Delivered() {
+        Order order = Order.builder().status(OrderStatus.DELIVERED).build();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        assertThrows(InvalidOrderStateException.class, () -> 
+                orderService.assignOrderToDeliveryExecutive(1L, "exec-1")
+        );
+    }
+
+    @Test
+    void getOrdersAssignedToMe_Success_Placeholder() {
+        Order order = new Order();
+        OrderResponseDto dto = new OrderResponseDto();
+        when(orderRepository.findByDeliveryExecutiveId("6ad8df34-4263-4fce-a22a-4e0acabbde94")).thenReturn(List.of(order));
+        when(orderRepository.findByDeliveryExecutiveId("delivery-exec-uuid")).thenReturn(List.of(order));
+        when(orderMapper.toResponseDto(order)).thenReturn(dto);
+
+        List<OrderResponseDto> result = orderService.getOrdersAssignedToMe("6ad8df34-4263-4fce-a22a-4e0acabbde94");
+
+        assertEquals(2, result.size());
+        assertSame(dto, result.get(0));
+    }
 }

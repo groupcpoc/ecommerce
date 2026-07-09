@@ -44,7 +44,7 @@ spring:
 
 eureka:
   instance:
-    hostname: order-service
+    prefer-ip-address: true
   client:
     registerWithEureka: true
     fetchRegistry: false
