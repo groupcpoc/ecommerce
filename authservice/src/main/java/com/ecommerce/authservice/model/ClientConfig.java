@@ -1,0 +1,28 @@
+package com.ecommerce.authservice.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ClientConfig {
+
+    private String clientId;
+
+    private String clientSecret;
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+}

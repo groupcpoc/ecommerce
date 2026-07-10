@@ -1,0 +1,33 @@
+{
+  "realm": "ecommerce-realm",
+  "enabled": true,
+
+  "clientId": "ecommerce-client",
+  "clientSecret": "ecommerce-secret",
+
+  "roles": [
+    "ROLE_ADMIN",
+    "ROLE_USER"
+  ],
+
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@test.com",
+      "password": "admin321",
+      "emailVerified": true,
+      "roles": [
+        "ROLE_ADMIN"
+      ]
+    },
+    {
+      "username": "user",
+      "email": "user@test.com",
+      "password": "User@123",
+      "emailVerified": true,
+      "roles": [
+        "ROLE_USER"
+      ]
+    }
+  ]
+}

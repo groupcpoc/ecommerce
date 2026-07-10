@@ -1,0 +1,73 @@
+server:
+    port:8082
+keycloak:
+  auth-server-url: http://localhost:8080
+  resources: master    #ecommerce-client
+  public-client: true
+  bearer-only: true
+  realm: master #ecommerce-realm
+  client_id: admin-cli #ecommerce-client
+#  client_secret: ecommerce-client
+  admin:
+    username: admin
+    password: admin321
+  use-resource-role-mappings: true
+  realm-cofig: keycloak/realm-config.json
+  user:
+    realm: ecommerce-realm
+    client_id: ecommerce-client
+    client_secret: ecommerce-client
+    username-attribute: username
+    email-attribute: email
+    email-verification: enabled
+    password-attribute: password
+    jwks-uri: http://localhost:8080/realms/ecommerce-realm/protocol/openid-connect/certs
+  logout-url: http://localhost:8080/realms/ecommerce-realm/protocol/openid-connect/logout
+    
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#    instance:
+#      prefer-ip-address: true
+    
+#Zookeeper configuration
+zookeeper:
+  connect: localhost:2181
+  image: confluentinc/cp-zookeeper:7.5.0
+  container_name: zookeeper
+  environment:ZOOKEEPER_CLIENT_PORT: 2181
+    ZOOKEEPER_TICK_TIME:2000
+    ports:2181
+    # :::::::::Kafka configuration:::::::::
+    #spring.kafka.bootstrap-servers:kafka:9092
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      group-id: user-service-group
+      auto-offset-reset: earliest
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    
+    consumer:
+      group-id: user-service-group
+      auto-offset-reset: earliest
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    
+    properties:
+      spring:
+        json:
+          trusted:
+            packages: "*"
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: auth-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/ecommerce-realm
