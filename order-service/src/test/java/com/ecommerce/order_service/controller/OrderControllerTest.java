@@ -67,9 +67,9 @@ class OrderControllerTest {
     @Test
     void getOrderById_Success() throws Exception {
         OrderResponseDto response = OrderResponseDto.builder().id(1L).orderId("uuid").build();
-        when(orderService.getOrderById(eq(1L), eq("user-1"), eq(false))).thenReturn(response);
+        when(orderService.getOrderById(eq("uuid-123"), eq("user-1"), eq(false))).thenReturn(response);
 
-        mockMvc.perform(get("/api/orders/1")
+        mockMvc.perform(get("/api/orders/uuid-123")
                         .with(jwt().jwt(j -> j.subject("user-1")).authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderId").value("uuid"));
@@ -78,9 +78,9 @@ class OrderControllerTest {
     @Test
     void cancelOrder_Success() throws Exception {
         OrderResponseDto response = OrderResponseDto.builder().id(1L).orderId("uuid").build();
-        when(orderService.cancelOrder(eq(1L), eq("user-1"), eq(false))).thenReturn(response);
+        when(orderService.cancelOrder(eq("uuid-123"), eq("user-1"), eq(false))).thenReturn(response);
 
-        mockMvc.perform(delete("/api/orders/1")
+        mockMvc.perform(delete("/api/orders/uuid-123")
                         .with(jwt().jwt(j -> j.subject("user-1")).authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderId").value("uuid"));
@@ -103,9 +103,9 @@ class OrderControllerTest {
         StatusUpdateRequestDto request = new StatusUpdateRequestDto();
         request.setStatus(OrderStatus.CONFIRMED);
 
-        when(orderService.updateOrderStatus(eq(1L), eq(OrderStatus.CONFIRMED))).thenReturn(response);
+        when(orderService.updateOrderStatus(eq("uuid-123"), eq(OrderStatus.CONFIRMED))).thenReturn(response);
 
-        mockMvc.perform(put("/api/orders/1")
+        mockMvc.perform(put("/api/orders/uuid-123")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -131,9 +131,9 @@ class OrderControllerTest {
                 .deliveryExecutiveId("exec-1")
                 .build();
 
-        when(orderService.assignOrderToDeliveryExecutive(eq(1L), eq("exec-1"))).thenReturn(response);
+        when(orderService.assignOrderToDeliveryExecutive(eq("uuid-123"), eq("exec-1"))).thenReturn(response);
 
-        mockMvc.perform(put("/api/orders/1/assign")
+        mockMvc.perform(put("/api/orders/uuid-123/assign")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -147,9 +147,9 @@ class OrderControllerTest {
         StatusUpdateRequestDto request = new StatusUpdateRequestDto();
         request.setStatus(OrderStatus.OUT_FOR_DELIVERY);
 
-        when(orderService.updateDeliveryStatus(eq(1L), eq(OrderStatus.OUT_FOR_DELIVERY), eq("exec-1"))).thenReturn(response);
+        when(orderService.updateDeliveryStatus(eq("uuid-123"), eq(OrderStatus.OUT_FOR_DELIVERY), eq("exec-1"))).thenReturn(response);
 
-        mockMvc.perform(put("/api/orders/1/delivery-status")
+        mockMvc.perform(put("/api/orders/uuid-123/delivery-status")
                         .with(jwt().jwt(j -> j.subject("exec-1")).authorities(new SimpleGrantedAuthority("ROLE_DELIVERY_EXECUTIVE")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

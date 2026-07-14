@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
@@ -130,14 +131,14 @@ public class SecurityConfig {
     }
 
     private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
-        List<String> roles = jwt.getClaimAsStringList("roles");
-        System.out.println("Extracted roles claim: " + roles);
-
-        if (roles == null) {
+        Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
+        if (realmAccess == null || !realmAccess.containsKey("roles")) {
             return List.of();
         }
+        @SuppressWarnings("unchecked")
+        List<String> roles = (List<String>) realmAccess.get("roles");
         return roles.stream()
-                .map(SimpleGrantedAuthority::new)
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                 .collect(Collectors.toList());
     }
 }

@@ -5,7 +5,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -15,21 +17,27 @@ public class OrderEventPublisher {
     private static final String ORDER_CREATED_TOPIC = "order.created";
     private static final String ORDER_CANCELLED_TOPIC = "order.cancelled";
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public OrderEventPublisher(KafkaTemplate<String, String> kafkaTemplate) {
+    public OrderEventPublisher(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void publishOrderCreated(String orderId, String userId, String items, Double amount) {
-        String payload = String.format(
-                "{\"orderId\":\"%s\",\"userId\":\"%s\",\"items\":%s,\"amount\":%.2f}",
-                orderId, userId, items, amount);
+    public void publishOrderCreated(String orderId, String userId, List<String> items, Double amount) {
+        List<CharSequence> avroItems = items.stream()
+                .map(item -> (CharSequence) item)
+                .collect(Collectors.toList());
 
-        log.info("Publishing to Kafka topic [{}] — payload: {}", ORDER_CREATED_TOPIC, payload);
+        com.ecommerce.events.OrderCreatedEvent event = com.ecommerce.events.OrderCreatedEvent.newBuilder()
+                .setOrderId(orderId)
+                .setUserId(userId)
+                .setAmount(amount)
+                .setItems(avroItems)
+                .build();
 
-        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(ORDER_CREATED_TOPIC, orderId,
-                payload);
+        log.info("Publishing to Kafka topic [{}] — payload: {}", ORDER_CREATED_TOPIC, event);
+
+        CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(ORDER_CREATED_TOPIC, orderId, event);
 
         future.whenComplete((result, ex) -> {
             if (ex != null) {
@@ -44,14 +52,15 @@ public class OrderEventPublisher {
     }
 
     public void publishOrderCancelled(String orderId, String userId, String reason) {
-        String payload = String.format(
-                "{\"orderId\":\"%s\",\"userId\":\"%s\",\"reason\":\"%s\"}",
-                orderId, userId, reason);
+        com.ecommerce.events.OrderCancelledEvent event = com.ecommerce.events.OrderCancelledEvent.newBuilder()
+                .setOrderId(orderId)
+                .setUserId(userId)
+                .setReason(reason)
+                .build();
 
-        log.info("Publishing to Kafka topic [{}] — payload: {}", ORDER_CANCELLED_TOPIC, payload);
+        log.info("Publishing to Kafka topic [{}] — payload: {}", ORDER_CANCELLED_TOPIC, event);
 
-        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(ORDER_CANCELLED_TOPIC, orderId,
-                payload);
+        CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(ORDER_CANCELLED_TOPIC, orderId, event);
 
         future.whenComplete((result, ex) -> {
             if (ex != null) {

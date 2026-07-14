@@ -51,11 +51,7 @@ public class OrderServiceImpl implements OrderService {
         Order saved = orderRepository.save(order);
         log.info("Order saved — orderId={}, status=PENDING", orderId);
 
-        String itemsJson = "[" + requestDto.getItems().stream()
-                .map(item -> "\"" + item + "\"")
-                .collect(Collectors.joining(",")) + "]";
-
-        eventPublisher.publishOrderCreated(orderId, userId, itemsJson, requestDto.getAmount());
+        eventPublisher.publishOrderCreated(orderId, userId, requestDto.getItems(), requestDto.getAmount());
 
         return orderMapper.toResponseDto(saved);
     }
@@ -72,9 +68,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderResponseDto getOrderById(Long id, String userId, boolean isAdmin) {
-        log.info("Fetching order id={} by user={} isAdmin={}", id, userId, isAdmin);
-        Order order = findOrderOrThrow(id);
+    public OrderResponseDto getOrderById(String orderId, String userId, boolean isAdmin) {
+        log.info("Fetching order orderId={} by user={} isAdmin={}", orderId, userId, isAdmin);
+        Order order = findOrderOrThrow(orderId);
 
         if (!isAdmin && !order.getUserId().equals(userId)) {
             throw new AccessDeniedException("You are not authorized to view this order.");
@@ -85,9 +81,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderResponseDto cancelOrder(Long id, String userId, boolean isAdmin) {
-        log.info("Cancel request for order id={} by user={} isAdmin={}", id, userId, isAdmin);
-        Order order = findOrderOrThrow(id);
+    public OrderResponseDto cancelOrder(String orderId, String userId, boolean isAdmin) {
+        log.info("Cancel request for order orderId={} by user={} isAdmin={}", orderId, userId, isAdmin);
+        Order order = findOrderOrThrow(orderId);
 
         if (!isAdmin && !order.getUserId().equals(userId)) {
             throw new AccessDeniedException("You can only cancel your own orders.");
@@ -101,7 +97,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.CANCELLED);
         order.setUpdatedAt(LocalDateTime.now());
         Order saved = orderRepository.save(order);
-        log.info("Order id={} cancelled", id);
+        log.info("Order orderId={} cancelled", orderId);
 
         // Publish order.cancelled event so Payment Service can reverse the charge
         String reason = isAdmin ? "ADMIN_CANCELLED" : "CUSTOMER_CANCELLED";
@@ -122,9 +118,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderResponseDto updateOrderStatus(Long id, OrderStatus newStatus) {
-        log.info("Admin: updating order id={} to status={}", id, newStatus);
-        Order order = findOrderOrThrow(id);
+    public OrderResponseDto updateOrderStatus(String orderId, OrderStatus newStatus) {
+        log.info("Admin: updating order orderId={} to status={}", orderId, newStatus);
+        Order order = findOrderOrThrow(orderId);
 
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.DELIVERED) {
             throw new InvalidOrderStateException(
@@ -134,14 +130,14 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(newStatus);
         order.setUpdatedAt(LocalDateTime.now());
         Order saved = orderRepository.save(order);
-        log.info("Order id={} status updated to {}", id, newStatus);
+        log.info("Order orderId={} status updated to {}", orderId, newStatus);
 
         return orderMapper.toResponseDto(saved);
     }
 
-    private Order findOrderOrThrow(Long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + id + " not found."));
+    private Order findOrderOrThrow(String orderId) {
+        return orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found."));
     }
 
     @Override
@@ -150,7 +146,8 @@ public class OrderServiceImpl implements OrderService {
         log.info("Fetching orders assigned to delivery executive ID={}", deliveryExecutiveId);
         
         List<Order> orders = new java.util.ArrayList<>(orderRepository.findByDeliveryExecutiveId(deliveryExecutiveId));
-        if ("6ad8df34-4263-4fce-a22a-4e0acabbde94".equals(deliveryExecutiveId)) {
+        if ("6ad8df34-4263-4fce-a22a-4e0acabbde94".equals(deliveryExecutiveId) ||
+            "e8abb60e-fdd2-468c-a8c8-472ccc23bc05".equals(deliveryExecutiveId)) {
             orders.addAll(orderRepository.findByDeliveryExecutiveId("delivery-exec-uuid"));
         }
         
@@ -161,9 +158,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderResponseDto assignOrderToDeliveryExecutive(Long id, String deliveryExecutiveId) {
-        log.info("Admin: Assigning order id={} to delivery executive ID={}", id, deliveryExecutiveId);
-        Order order = findOrderOrThrow(id);
+    public OrderResponseDto assignOrderToDeliveryExecutive(String orderId, String deliveryExecutiveId) {
+        log.info("Admin: Assigning order orderId={} to delivery executive ID={}", orderId, deliveryExecutiveId);
+        Order order = findOrderOrThrow(orderId);
 
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.DELIVERED) {
             throw new InvalidOrderStateException("Cannot assign a " + order.getStatus() + " order.");
@@ -172,15 +169,15 @@ public class OrderServiceImpl implements OrderService {
         order.setDeliveryExecutiveId(deliveryExecutiveId);
         order.setUpdatedAt(LocalDateTime.now());
         Order saved = orderRepository.save(order);
-        log.info("Order id={} assigned to delivery executive ID={}", id, deliveryExecutiveId);
+        log.info("Order orderId={} assigned to delivery executive ID={}", orderId, deliveryExecutiveId);
         return orderMapper.toResponseDto(saved);
     }
 
     @Override
     @Transactional
-    public OrderResponseDto updateDeliveryStatus(Long id, OrderStatus status, String deliveryExecutiveId) {
-        log.info("Delivery Executive: Updating order id={} to status={} by executive ID={}", id, status, deliveryExecutiveId);
-        Order order = findOrderOrThrow(id);
+    public OrderResponseDto updateDeliveryStatus(String orderId, OrderStatus status, String deliveryExecutiveId) {
+        log.info("Delivery Executive: Updating order orderId={} to status={} by executive ID={}", orderId, status, deliveryExecutiveId);
+        Order order = findOrderOrThrow(orderId);
 
         if (order.getDeliveryExecutiveId() == null) {
             throw new AccessDeniedException("You are not authorized to update delivery status for this order.");
@@ -204,7 +201,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(status);
         order.setUpdatedAt(LocalDateTime.now());
         Order saved = orderRepository.save(order);
-        log.info("Order id={} status updated to {} by delivery executive", id, status);
+        log.info("Order orderId={} status updated to {} by delivery executive", orderId, status);
         return orderMapper.toResponseDto(saved);
     }
 }

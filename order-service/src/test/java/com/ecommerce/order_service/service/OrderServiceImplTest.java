@@ -60,7 +60,7 @@ class OrderServiceImplTest {
         assertNotNull(response);
         assertEquals("uuid", response.getOrderId());
         verify(orderRepository).save(any(Order.class));
-        verify(eventPublisher).publishOrderCreated(anyString(), anyString(), anyString(), anyDouble());
+        verify(eventPublisher).publishOrderCreated(anyString(), anyString(), anyList(), anyDouble());
     }
 
     @Test
@@ -80,10 +80,10 @@ class OrderServiceImplTest {
     void getOrderById_Success_Admin() {
         Order order = Order.builder().userId("user-1").build();
         OrderResponseDto dto = new OrderResponseDto();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.getOrderById(1L, "user-2", true);
+        OrderResponseDto result = orderService.getOrderById("uuid-123", "user-2", true);
 
         assertSame(dto, result);
     }
@@ -92,10 +92,10 @@ class OrderServiceImplTest {
     void getOrderById_Success_Owner() {
         Order order = Order.builder().userId("user-1").build();
         OrderResponseDto dto = new OrderResponseDto();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.getOrderById(1L, "user-1", false);
+        OrderResponseDto result = orderService.getOrderById("uuid-123", "user-1", false);
 
         assertSame(dto, result);
     }
@@ -103,19 +103,19 @@ class OrderServiceImplTest {
     @Test
     void getOrderById_AccessDenied() {
         Order order = Order.builder().userId("user-1").build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(AccessDeniedException.class, () -> 
-                orderService.getOrderById(1L, "user-2", false)
+                orderService.getOrderById("uuid-123", "user-2", false)
         );
     }
 
     @Test
     void getOrderById_NotFound() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> 
-                orderService.getOrderById(1L, "user-1", true)
+                orderService.getOrderById("uuid-123", "user-1", true)
         );
     }
 
@@ -128,11 +128,11 @@ class OrderServiceImplTest {
                 .build();
         OrderResponseDto dto = new OrderResponseDto();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.cancelOrder(1L, "user-1", false);
+        OrderResponseDto result = orderService.cancelOrder("uuid-123", "user-1", false);
 
         assertSame(dto, result);
         assertEquals(OrderStatus.CANCELLED, order.getStatus());
@@ -148,11 +148,11 @@ class OrderServiceImplTest {
                 .build();
         OrderResponseDto dto = new OrderResponseDto();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.cancelOrder(1L, "user-2", true);
+        OrderResponseDto result = orderService.cancelOrder("uuid-123", "user-2", true);
 
         assertSame(dto, result);
         assertEquals(OrderStatus.CANCELLED, order.getStatus());
@@ -162,20 +162,20 @@ class OrderServiceImplTest {
     @Test
     void cancelOrder_AccessDenied() {
         Order order = Order.builder().userId("user-1").status(OrderStatus.PENDING).build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(AccessDeniedException.class, () -> 
-                orderService.cancelOrder(1L, "user-2", false)
+                orderService.cancelOrder("uuid-123", "user-2", false)
         );
     }
 
     @Test
     void cancelOrder_InvalidState() {
         Order order = Order.builder().userId("user-1").status(OrderStatus.DELIVERED).build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(InvalidOrderStateException.class, () -> 
-                orderService.cancelOrder(1L, "user-1", false)
+                orderService.cancelOrder("uuid-123", "user-1", false)
         );
     }
 
@@ -197,11 +197,11 @@ class OrderServiceImplTest {
         Order order = Order.builder().status(OrderStatus.PENDING).build();
         OrderResponseDto dto = new OrderResponseDto();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.updateOrderStatus(1L, OrderStatus.CONFIRMED);
+        OrderResponseDto result = orderService.updateOrderStatus("uuid-123", OrderStatus.CONFIRMED);
 
         assertSame(dto, result);
         assertEquals(OrderStatus.CONFIRMED, order.getStatus());
@@ -210,10 +210,10 @@ class OrderServiceImplTest {
     @Test
     void updateOrderStatus_InvalidState() {
         Order order = Order.builder().status(OrderStatus.DELIVERED).build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(InvalidOrderStateException.class, () -> 
-                orderService.updateOrderStatus(1L, OrderStatus.CONFIRMED)
+                orderService.updateOrderStatus("uuid-123", OrderStatus.CONFIRMED)
         );
     }
 
@@ -235,11 +235,11 @@ class OrderServiceImplTest {
         Order order = Order.builder().status(OrderStatus.CONFIRMED).build();
         OrderResponseDto dto = new OrderResponseDto();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.assignOrderToDeliveryExecutive(1L, "exec-1");
+        OrderResponseDto result = orderService.assignOrderToDeliveryExecutive("uuid-123", "exec-1");
 
         assertSame(dto, result);
         assertEquals("exec-1", order.getDeliveryExecutiveId());
@@ -248,10 +248,10 @@ class OrderServiceImplTest {
     @Test
     void assignOrderToDeliveryExecutive_InvalidState() {
         Order order = Order.builder().status(OrderStatus.CANCELLED).build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(InvalidOrderStateException.class, () -> 
-                orderService.assignOrderToDeliveryExecutive(1L, "exec-1")
+                orderService.assignOrderToDeliveryExecutive("uuid-123", "exec-1")
         );
     }
 
@@ -263,11 +263,11 @@ class OrderServiceImplTest {
                 .build();
         OrderResponseDto dto = new OrderResponseDto();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.updateDeliveryStatus(1L, OrderStatus.OUT_FOR_DELIVERY, "exec-1");
+        OrderResponseDto result = orderService.updateDeliveryStatus("uuid-123", OrderStatus.OUT_FOR_DELIVERY, "exec-1");
 
         assertSame(dto, result);
         assertEquals(OrderStatus.OUT_FOR_DELIVERY, order.getStatus());
@@ -276,20 +276,20 @@ class OrderServiceImplTest {
     @Test
     void updateDeliveryStatus_AccessDenied() {
         Order order = Order.builder().deliveryExecutiveId("exec-2").build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(AccessDeniedException.class, () -> 
-                orderService.updateDeliveryStatus(1L, OrderStatus.OUT_FOR_DELIVERY, "exec-1")
+                orderService.updateDeliveryStatus("uuid-123", OrderStatus.OUT_FOR_DELIVERY, "exec-1")
         );
     }
 
     @Test
     void updateDeliveryStatus_InvalidStatus() {
         Order order = Order.builder().deliveryExecutiveId("exec-1").build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(IllegalArgumentException.class, () -> 
-                orderService.updateDeliveryStatus(1L, OrderStatus.PENDING, "exec-1")
+                orderService.updateDeliveryStatus("uuid-123", OrderStatus.PENDING, "exec-1")
         );
     }
 
@@ -299,10 +299,10 @@ class OrderServiceImplTest {
                 .deliveryExecutiveId("exec-1")
                 .status(OrderStatus.DELIVERED)
                 .build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(InvalidOrderStateException.class, () -> 
-                orderService.updateDeliveryStatus(1L, OrderStatus.DELIVERY_FAILED, "exec-1")
+                orderService.updateDeliveryStatus("uuid-123", OrderStatus.DELIVERY_FAILED, "exec-1")
         );
     }
 
@@ -314,11 +314,11 @@ class OrderServiceImplTest {
                 .build();
         OrderResponseDto dto = new OrderResponseDto();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.updateDeliveryStatus(1L, OrderStatus.OUT_FOR_DELIVERY, "exec-1");
+        OrderResponseDto result = orderService.updateDeliveryStatus("uuid-123", OrderStatus.OUT_FOR_DELIVERY, "exec-1");
 
         assertSame(dto, result);
         assertEquals(OrderStatus.OUT_FOR_DELIVERY, order.getStatus());
@@ -327,10 +327,10 @@ class OrderServiceImplTest {
     @Test
     void updateDeliveryStatus_ExecutiveNull() {
         Order order = Order.builder().deliveryExecutiveId(null).build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(AccessDeniedException.class, () -> 
-                orderService.updateDeliveryStatus(1L, OrderStatus.OUT_FOR_DELIVERY, "exec-1")
+                orderService.updateDeliveryStatus("uuid-123", OrderStatus.OUT_FOR_DELIVERY, "exec-1")
         );
     }
 
@@ -342,11 +342,11 @@ class OrderServiceImplTest {
                 .build();
         OrderResponseDto dto = new OrderResponseDto();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.updateDeliveryStatus(1L, OrderStatus.DELIVERED, "exec-1");
+        OrderResponseDto result = orderService.updateDeliveryStatus("uuid-123", OrderStatus.DELIVERED, "exec-1");
 
         assertSame(dto, result);
         assertEquals(OrderStatus.DELIVERED, order.getStatus());
@@ -360,11 +360,11 @@ class OrderServiceImplTest {
                 .build();
         OrderResponseDto dto = new OrderResponseDto();
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toResponseDto(order)).thenReturn(dto);
 
-        OrderResponseDto result = orderService.updateDeliveryStatus(1L, OrderStatus.DELIVERY_FAILED, "exec-1");
+        OrderResponseDto result = orderService.updateDeliveryStatus("uuid-123", OrderStatus.DELIVERY_FAILED, "exec-1");
 
         assertSame(dto, result);
         assertEquals(OrderStatus.DELIVERY_FAILED, order.getStatus());
@@ -376,30 +376,30 @@ class OrderServiceImplTest {
                 .deliveryExecutiveId("exec-1")
                 .status(OrderStatus.CANCELLED)
                 .build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(InvalidOrderStateException.class, () -> 
-                orderService.updateDeliveryStatus(1L, OrderStatus.OUT_FOR_DELIVERY, "exec-1")
+                orderService.updateDeliveryStatus("uuid-123", OrderStatus.OUT_FOR_DELIVERY, "exec-1")
         );
     }
 
     @Test
     void updateOrderStatus_InvalidState_Cancelled() {
         Order order = Order.builder().status(OrderStatus.CANCELLED).build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(InvalidOrderStateException.class, () -> 
-                orderService.updateOrderStatus(1L, OrderStatus.CONFIRMED)
+                orderService.updateOrderStatus("uuid-123", OrderStatus.CONFIRMED)
         );
     }
 
     @Test
     void assignOrderToDeliveryExecutive_InvalidState_Delivered() {
         Order order = Order.builder().status(OrderStatus.DELIVERED).build();
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
         assertThrows(InvalidOrderStateException.class, () -> 
-                orderService.assignOrderToDeliveryExecutive(1L, "exec-1")
+                orderService.assignOrderToDeliveryExecutive("uuid-123", "exec-1")
         );
     }
 

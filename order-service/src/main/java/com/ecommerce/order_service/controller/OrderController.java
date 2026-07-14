@@ -47,30 +47,30 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getMyOrders(userId));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{orderId}")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<OrderResponseDto> getOrderById(
-            @PathVariable Long id,
+            @PathVariable String orderId,
             Authentication auth) {
 
         String userId = auth.getName();
         boolean isAdmin = hasRole(auth, "ROLE_ADMIN");
-        log.info("GET /api/orders/{} — user={} isAdmin={}", id, userId, isAdmin);
+        log.info("GET /api/orders/{} — user={} isAdmin={}", orderId, userId, isAdmin);
 
-        return ResponseEntity.ok(orderService.getOrderById(id, userId, isAdmin));
+        return ResponseEntity.ok(orderService.getOrderById(orderId, userId, isAdmin));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{orderId}")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<OrderResponseDto> cancelOrder(
-            @PathVariable Long id,
+            @PathVariable String orderId,
             Authentication auth) {
 
         String userId = auth.getName();
         boolean isAdmin = hasRole(auth, "ROLE_ADMIN");
-        log.info("DELETE /api/orders/{} — user={} isAdmin={}", id, userId, isAdmin);
+        log.info("DELETE /api/orders/{} — user={} isAdmin={}", orderId, userId, isAdmin);
 
-        return ResponseEntity.ok(orderService.cancelOrder(id, userId, isAdmin));
+        return ResponseEntity.ok(orderService.cancelOrder(orderId, userId, isAdmin));
     }
 
     @GetMapping
@@ -80,14 +80,14 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{orderId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderResponseDto> updateOrderStatus(
-            @PathVariable Long id,
+            @PathVariable String orderId,
             @Valid @RequestBody StatusUpdateRequestDto requestDto) {
 
-        log.info("PUT /api/orders/{} — newStatus={}", id, requestDto.getStatus());
-        return ResponseEntity.ok(orderService.updateOrderStatus(id, requestDto.getStatus()));
+        log.info("PUT /api/orders/{} — newStatus={}", orderId, requestDto.getStatus());
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, requestDto.getStatus()));
     }
 
     @GetMapping("/assigned")
@@ -98,24 +98,24 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrdersAssignedToMe(deliveryExecutiveId));
     }
 
-    @PutMapping("/{id}/assign")
+    @PutMapping("/{orderId}/assign")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderResponseDto> assignOrder(
-            @PathVariable Long id,
+            @PathVariable String orderId,
             @Valid @RequestBody AssignOrderRequestDto requestDto) {
-        log.info("PUT /api/orders/{}/assign — deliveryExecutiveId={}", id, requestDto.getDeliveryExecutiveId());
-        return ResponseEntity.ok(orderService.assignOrderToDeliveryExecutive(id, requestDto.getDeliveryExecutiveId()));
+        log.info("PUT /api/orders/{}/assign — deliveryExecutiveId={}", orderId, requestDto.getDeliveryExecutiveId());
+        return ResponseEntity.ok(orderService.assignOrderToDeliveryExecutive(orderId, requestDto.getDeliveryExecutiveId()));
     }
 
-    @PutMapping("/{id}/delivery-status")
+    @PutMapping("/{orderId}/delivery-status")
     @PreAuthorize("hasRole('DELIVERY_EXECUTIVE')")
     public ResponseEntity<OrderResponseDto> updateDeliveryStatus(
-            @PathVariable Long id,
+            @PathVariable String orderId,
             @Valid @RequestBody StatusUpdateRequestDto requestDto,
             Authentication auth) {
         String deliveryExecutiveId = auth.getName();
-        log.info("PUT /api/orders/{}/delivery-status — status={} by deliveryExecutiveId={}", id, requestDto.getStatus(), deliveryExecutiveId);
-        return ResponseEntity.ok(orderService.updateDeliveryStatus(id, requestDto.getStatus(), deliveryExecutiveId));
+        log.info("PUT /api/orders/{}/delivery-status — status={} by deliveryExecutiveId={}", orderId, requestDto.getStatus(), deliveryExecutiveId);
+        return ResponseEntity.ok(orderService.updateDeliveryStatus(orderId, requestDto.getStatus(), deliveryExecutiveId));
     }
 
     private boolean hasRole(Authentication auth, String role) {

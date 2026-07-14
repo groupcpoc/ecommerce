@@ -3,7 +3,6 @@ package com.ecommerce.order_service.consumer;
 import com.ecommerce.order_service.entity.Order;
 import com.ecommerce.order_service.enums.OrderStatus;
 import com.ecommerce.order_service.repository.OrderRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -20,14 +19,12 @@ class OrderEventConsumerTest {
     @Mock
     private OrderRepository orderRepository;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     private OrderEventConsumer consumer;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        consumer = new OrderEventConsumer(orderRepository, objectMapper);
+        consumer = new OrderEventConsumer(orderRepository);
     }
 
     @Test
@@ -35,23 +32,16 @@ class OrderEventConsumerTest {
         Order order = Order.builder().orderId("uuid-123").status(OrderStatus.PENDING).build();
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
-        String message = "{\"orderId\":\"uuid-123\"}";
-        consumer.handlePaymentFailed(message);
+        com.ecommerce.events.PaymentFailedEvent event = com.ecommerce.events.PaymentFailedEvent.newBuilder()
+                .setOrderId("uuid-123")
+                .setUserId("user-123")
+                .setReason("Card declined")
+                .build();
+
+        consumer.handlePaymentFailed(event);
 
         assertEquals(OrderStatus.CANCELLED, order.getStatus());
         verify(orderRepository).save(order);
-    }
-
-    @Test
-    void handlePaymentFailed_InvalidJson() {
-        consumer.handlePaymentFailed("invalid-json");
-        verify(orderRepository, never()).findByOrderId(anyString());
-    }
-
-    @Test
-    void handlePaymentFailed_NullOrderId() {
-        consumer.handlePaymentFailed("{}");
-        verify(orderRepository, never()).findByOrderId(anyString());
     }
 
     @Test
@@ -59,17 +49,16 @@ class OrderEventConsumerTest {
         Order order = Order.builder().orderId("uuid-123").status(OrderStatus.PENDING).build();
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
-        String message = "{\"orderId\":\"uuid-123\"}";
-        consumer.handleInventoryFailed(message);
+        com.ecommerce.events.InventoryFailedEvent event = com.ecommerce.events.InventoryFailedEvent.newBuilder()
+                .setOrderId("uuid-123")
+                .setProductId("prod-456")
+                .setReason("Out of stock")
+                .build();
+
+        consumer.handleInventoryFailed(event);
 
         assertEquals(OrderStatus.CANCELLED, order.getStatus());
         verify(orderRepository).save(order);
-    }
-
-    @Test
-    void handleInventoryFailed_NullOrderId() {
-        consumer.handleInventoryFailed("{}");
-        verify(orderRepository, never()).findByOrderId(anyString());
     }
 
     @Test
@@ -77,24 +66,29 @@ class OrderEventConsumerTest {
         Order order = Order.builder().orderId("uuid-123").status(OrderStatus.PENDING).build();
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
-        String message = "{\"orderId\":\"uuid-123\"}";
-        consumer.handleInventoryReserved(message);
+        com.ecommerce.events.InventoryReservedEvent event = com.ecommerce.events.InventoryReservedEvent.newBuilder()
+                .setOrderId("uuid-123")
+                .setProductId("prod-456")
+                .setQuantity(2)
+                .build();
+
+        consumer.handleInventoryReserved(event);
 
         assertEquals(OrderStatus.CONFIRMED, order.getStatus());
         verify(orderRepository).save(order);
     }
 
     @Test
-    void handleInventoryReserved_NullOrderId() {
-        consumer.handleInventoryReserved("{}");
-        verify(orderRepository, never()).findByOrderId(anyString());
-    }
-
-    @Test
     void updateOrderStatus_OrderNotFound() {
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.empty());
 
-        consumer.handleInventoryReserved("{\"orderId\":\"uuid-123\"}");
+        com.ecommerce.events.InventoryReservedEvent event = com.ecommerce.events.InventoryReservedEvent.newBuilder()
+                .setOrderId("uuid-123")
+                .setProductId("prod-456")
+                .setQuantity(2)
+                .build();
+
+        consumer.handleInventoryReserved(event);
 
         verify(orderRepository, never()).save(any(Order.class));
     }
@@ -104,7 +98,13 @@ class OrderEventConsumerTest {
         Order order = Order.builder().orderId("uuid-123").status(OrderStatus.CANCELLED).build();
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
-        consumer.handleInventoryReserved("{\"orderId\":\"uuid-123\"}");
+        com.ecommerce.events.InventoryReservedEvent event = com.ecommerce.events.InventoryReservedEvent.newBuilder()
+                .setOrderId("uuid-123")
+                .setProductId("prod-456")
+                .setQuantity(2)
+                .build();
+
+        consumer.handleInventoryReserved(event);
 
         verify(orderRepository, never()).save(any(Order.class));
     }
@@ -114,7 +114,13 @@ class OrderEventConsumerTest {
         Order order = Order.builder().orderId("uuid-123").status(OrderStatus.DELIVERED).build();
         when(orderRepository.findByOrderId("uuid-123")).thenReturn(Optional.of(order));
 
-        consumer.handleInventoryReserved("{\"orderId\":\"uuid-123\"}");
+        com.ecommerce.events.InventoryReservedEvent event = com.ecommerce.events.InventoryReservedEvent.newBuilder()
+                .setOrderId("uuid-123")
+                .setProductId("prod-456")
+                .setQuantity(2)
+                .build();
+
+        consumer.handleInventoryReserved(event);
 
         verify(orderRepository, never()).save(any(Order.class));
     }

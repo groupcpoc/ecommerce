@@ -12,17 +12,17 @@ public interface OrderService {
 
     List<OrderResponseDto> getMyOrders(String userId);
 
-    OrderResponseDto getOrderById(Long id, String userId, boolean isAdmin);
+    OrderResponseDto getOrderById(String orderId, String userId, boolean isAdmin);
 
-    OrderResponseDto cancelOrder(Long id, String userId, boolean isAdmin);
+    OrderResponseDto cancelOrder(String orderId, String userId, boolean isAdmin);
 
     List<OrderResponseDto> getAllOrders();
 
-    OrderResponseDto updateOrderStatus(Long id, OrderStatus newStatus);
+    OrderResponseDto updateOrderStatus(String orderId, OrderStatus newStatus);
 
     List<OrderResponseDto> getOrdersAssignedToMe(String deliveryExecutiveId);
 
-    OrderResponseDto assignOrderToDeliveryExecutive(Long id, String deliveryExecutiveId);
+    OrderResponseDto assignOrderToDeliveryExecutive(String orderId, String deliveryExecutiveId);
 
-    OrderResponseDto updateDeliveryStatus(Long id, OrderStatus status, String deliveryExecutiveId);
+    OrderResponseDto updateDeliveryStatus(String orderId, OrderStatus status, String deliveryExecutiveId);
 }

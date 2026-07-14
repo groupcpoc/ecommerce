@@ -3,8 +3,6 @@ package com.ecommerce.order_service.consumer;
 import com.ecommerce.order_service.entity.Order;
 import com.ecommerce.order_service.enums.OrderStatus;
 import com.ecommerce.order_service.repository.OrderRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
- * Consumes Kafka events from Payment Service and Inventory Service
+ * Consumes Kafka Avro events from Payment Service and Inventory Service
  * and updates order status accordingly.
  *
  * Topics consumed:
@@ -29,17 +27,16 @@ import java.util.Optional;
 public class OrderEventConsumer {
 
     private final OrderRepository orderRepository;
-    private final ObjectMapper objectMapper;
 
     // ─── payment.failed ─────────────────────────────────────────────────────────
 
     @KafkaListener(topics = "payment.failed", groupId = "order-service-group")
     @Transactional
-    public void handlePaymentFailed(String message) {
-        log.info("Received [payment.failed] — {}", message);
+    public void handlePaymentFailed(com.ecommerce.events.PaymentFailedEvent event) {
+        log.info("Received [payment.failed] — {}", event);
 
-        String orderId = extractOrderId(message);
-        if (orderId == null) return;
+        if (event.getOrderId() == null) return;
+        String orderId = event.getOrderId().toString();
 
         updateOrderStatus(orderId, OrderStatus.CANCELLED, "payment.failed");
     }
@@ -48,11 +45,11 @@ public class OrderEventConsumer {
 
     @KafkaListener(topics = "inventory.failed", groupId = "order-service-group")
     @Transactional
-    public void handleInventoryFailed(String message) {
-        log.info("Received [inventory.failed] — {}", message);
+    public void handleInventoryFailed(com.ecommerce.events.InventoryFailedEvent event) {
+        log.info("Received [inventory.failed] — {}", event);
 
-        String orderId = extractOrderId(message);
-        if (orderId == null) return;
+        if (event.getOrderId() == null) return;
+        String orderId = event.getOrderId().toString();
 
         updateOrderStatus(orderId, OrderStatus.CANCELLED, "inventory.failed");
     }
@@ -61,30 +58,16 @@ public class OrderEventConsumer {
 
     @KafkaListener(topics = "inventory.reserved", groupId = "order-service-group")
     @Transactional
-    public void handleInventoryReserved(String message) {
-        log.info("Received [inventory.reserved] — {}", message);
+    public void handleInventoryReserved(com.ecommerce.events.InventoryReservedEvent event) {
+        log.info("Received [inventory.reserved] — {}", event);
 
-        String orderId = extractOrderId(message);
-        if (orderId == null) return;
+        if (event.getOrderId() == null) return;
+        String orderId = event.getOrderId().toString();
 
         updateOrderStatus(orderId, OrderStatus.CONFIRMED, "inventory.reserved");
     }
 
     // ─── helpers ────────────────────────────────────────────────────────────────
-
-    /**
-     * Extracts the "orderId" field from a JSON message payload.
-     */
-    private String extractOrderId(String message) {
-        try {
-            JsonNode node = objectMapper.readTree(message);
-            String orderId = node.get("orderId").asText();
-            return orderId;
-        } catch (Exception e) {
-            log.error("Failed to parse orderId from Kafka message: {} — {}", message, e.getMessage());
-            return null;
-        }
-    }
 
     /**
      * Looks up the order by its UUID-based orderId and transitions it to the
