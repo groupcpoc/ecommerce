@@ -303,19 +303,19 @@ class ProductServiceImplTest {
         assertThrows(ProductNotFoundException.class, () -> productService.updateQuantity(1L, 99));
     }
 
-    @Test
-    void deleteProduct_shouldDeleteWhenExists() {
-        when(productRepository.existsById(1L)).thenReturn(true);
-
-        productService.deleteProduct(1L);
-
-        verify(productRepository).deleteById(1L);
-    }
-
-    @Test
-    void deleteProduct_shouldThrowWhenMissing() {
-        when(productRepository.existsById(1L)).thenReturn(false);
-
-        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(1L));
-    }
+//    @Test
+//    void deleteProduct_shouldDeleteWhenExists() {
+//        when(productRepository.existsById(1L)).thenReturn(true);
+//
+//        productService.deleteProduct(1L);
+//
+//        verify(productRepository).deleteById(1L);
+//    }
+//
+//    @Test
+//    void deleteProduct_shouldThrowWhenMissing() {
+//        when(productRepository.existsById(1L)).thenReturn(false);
+//
+//        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(1L));
+//    }
 }

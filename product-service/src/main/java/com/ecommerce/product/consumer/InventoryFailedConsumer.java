@@ -1,59 +1,51 @@
 package com.ecommerce.product.consumer;
 
+import com.ecommerce.events.InventoryFailedEvent;
 import com.ecommerce.product.entity.Product;
-import com.ecommerce.product.repository.ProductRepository;
 import com.ecommerce.product.enums.ProductStatus;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ecommerce.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryFailedConsumer {
 
     private final ProductRepository productRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @KafkaListener(
             topics = "inventory.failed",
-            groupId = "product-service-group"
+            groupId = "product-service-group",
+            containerFactory = "kafkaListenerContainerFactory"
     )
-    public void consumeInventoryFailed(String message) {
-        log.info("Received inventory.failed event: {}", message);
+    public void consume(InventoryFailedEvent event) {
 
-        try {
-            JsonNode jsonNode = objectMapper.readTree(message);
-            String productId = jsonNode.get("productId").asText();
-            String reason = jsonNode.get("reason") != null ? jsonNode.get("reason").asText() : "Unknown";
+        log.info("Inventory Failed Event Received : {}", event);
 
-            log.info("Processing inventory failure for product: {}, reason: {}", productId, reason);
+        String productId = event.getProductId().toString();
+        String reason = event.getReason().toString();
 
-            Optional<Product> productOptional = productRepository.findBySku(productId);
+        Product product = productRepository.findBySku(productId)
+                .orElse(null);
 
-            if (productOptional.isPresent()) {
-                Product product = productOptional.get();
-
-                if (product.getQuantity() <= 10) {
-                    product.setStatus(ProductStatus.OUT_OF_STOCK);
-                    log.info("Product {} marked as OUT_OF_STOCK", productId);
-                } else {
-                    product.setStatus(ProductStatus.LOW_STOCK);
-                    log.info("Product {} marked as LOW_STOCK", productId);
-                }
-
-                productRepository.save(product);
-                log.info("Product {} updated successfully", productId);
-            } else {
-                log.warn("Product with SKU {} not found", productId);
-            }
-        } catch (Exception e) {
-            log.error("Error processing inventory.failed event: {}", e.getMessage(), e);
+        if (product == null) {
+            log.warn("Product not found for sku {}", productId);
+            return;
         }
+
+        if (product.getQuantity() == 0) {
+            product.setStatus(ProductStatus.OUT_OF_STOCK);
+        } else if (product.getQuantity() <= 10) {
+            product.setStatus(ProductStatus.LOW_STOCK);
+        }
+
+        productRepository.save(product);
+
+        log.info("Product updated after inventory failure. SKU={} Reason={}",
+                productId,
+                reason);
     }
 }
