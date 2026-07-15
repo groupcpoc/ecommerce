@@ -124,7 +124,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Test mode — Razorpay does not generate a pay_ ID in test mode
         // Skipping actual Razorpay refund API call
-        // razorpayClient.payments.refund(payment.getRazorpayId(), options);
         log.info("Test mode — skipping Razorpay refund API call for paymentId: {}", paymentId);
 
         payment.setStatus(PaymentStatus.REFUNDED);
