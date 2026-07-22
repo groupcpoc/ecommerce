@@ -19,10 +19,13 @@ spring:
           jwk-set-uri: http://localhost:8080/realms/ecommerce/protocol/openid-connect/certs
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/order_db
+    url: jdbc:postgresql://localhost:5432/ecommerce_order_db
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+
+
+
 
   jpa:
     hibernate:

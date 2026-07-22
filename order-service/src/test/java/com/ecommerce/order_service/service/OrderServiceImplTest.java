@@ -416,4 +416,19 @@ class OrderServiceImplTest {
         assertEquals(2, result.size());
         assertSame(dto, result.get(0));
     }
+
+    @Test
+    void getOrdersAssignedToMe_Success_Placeholder_SecondUuid() {
+        Order order = new Order();
+        OrderResponseDto dto = new OrderResponseDto();
+        when(orderRepository.findByDeliveryExecutiveId("e8abb60e-fdd2-468c-a8c8-472ccc23bc05")).thenReturn(List.of(order));
+        when(orderRepository.findByDeliveryExecutiveId("delivery-exec-uuid")).thenReturn(List.of(order));
+        when(orderMapper.toResponseDto(order)).thenReturn(dto);
+
+        List<OrderResponseDto> result = orderService.getOrdersAssignedToMe("e8abb60e-fdd2-468c-a8c8-472ccc23bc05");
+
+        assertEquals(2, result.size());
+        assertSame(dto, result.get(0));
+    }
 }
+

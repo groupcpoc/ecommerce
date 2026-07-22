@@ -124,4 +124,36 @@ class OrderEventConsumerTest {
 
         verify(orderRepository, never()).save(any(Order.class));
     }
+
+    @Test
+    void handlePaymentFailed_NullOrderId_ReturnsImmediately() {
+        com.ecommerce.events.PaymentFailedEvent event = mock(com.ecommerce.events.PaymentFailedEvent.class);
+        when(event.getOrderId()).thenReturn(null);
+
+        consumer.handlePaymentFailed(event);
+
+        verifyNoInteractions(orderRepository);
+    }
+
+    @Test
+    void handleInventoryFailed_NullOrderId_ReturnsImmediately() {
+        com.ecommerce.events.InventoryFailedEvent event = mock(com.ecommerce.events.InventoryFailedEvent.class);
+        when(event.getOrderId()).thenReturn(null);
+
+        consumer.handleInventoryFailed(event);
+
+        verifyNoInteractions(orderRepository);
+    }
+
+    @Test
+    void handleInventoryReserved_NullOrderId_ReturnsImmediately() {
+        com.ecommerce.events.InventoryReservedEvent event = mock(com.ecommerce.events.InventoryReservedEvent.class);
+        when(event.getOrderId()).thenReturn(null);
+
+        consumer.handleInventoryReserved(event);
+
+        verifyNoInteractions(orderRepository);
+    }
 }
+
+
