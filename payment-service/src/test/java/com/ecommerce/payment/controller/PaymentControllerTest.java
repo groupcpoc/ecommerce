@@ -15,6 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Month;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,11 +39,19 @@ class PaymentControllerTest {
     private static final String USER_ID = "user-456";
     private static final String PAYMENT_ID = "11111111-1111-1111-1111-111111111111";
 
+    LocalDateTime fixedTime = LocalDateTime.of(
+            2024,
+            Month.JANUARY,
+            1,
+            10,
+            30
+    );
+
     private PaymentResponse buildResponse(PaymentStatus status) {
         return new PaymentResponse(
                 PAYMENT_ID, "order-123", USER_ID, BigDecimal.valueOf(499.99),
                 status, "order_T7BxaqvauXjTC5", null,
-                LocalDateTime.now(), LocalDateTime.now());
+                fixedTime,fixedTime);
     }
 
     @Nested

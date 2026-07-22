@@ -8,16 +8,24 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("PaymentMapper")
 class PaymentMapperTest {
+    LocalDateTime fixedTime = LocalDateTime.of(
+            2024,
+            Month.JANUARY,
+            1,
+            10,
+            30
+    );
 
     @Test
     @DisplayName("maps every field from Payment entity to PaymentResponse correctly")
     void mapsAllFieldsCorrectly() {
-        LocalDateTime now = LocalDateTime.now();
+
         Payment payment = Payment.builder()
                 .id("11111111-1111-1111-1111-111111111111")
                 .orderId("order-123")
@@ -26,8 +34,8 @@ class PaymentMapperTest {
                 .status(PaymentStatus.SUCCESS)
                 .razorpayId("order_T7BxaqvauXjTC5")
                 .failureReason(null)
-                .createdAt(now)
-                .updatedAt(now)
+                .createdAt(fixedTime)
+                .updatedAt(fixedTime)
                 .build();
 
         PaymentResponse result = PaymentMapper.toDTO(payment);
@@ -39,8 +47,8 @@ class PaymentMapperTest {
         assertThat(result.status()).isEqualTo(PaymentStatus.SUCCESS);
         assertThat(result.razorpayId()).isEqualTo("order_T7BxaqvauXjTC5");
         assertThat(result.failureReason()).isNull();
-        assertThat(result.createdAt()).isEqualTo(now);
-        assertThat(result.updatedAt()).isEqualTo(now);
+        assertThat(result.createdAt()).isEqualTo(fixedTime);
+        assertThat(result.updatedAt()).isEqualTo(fixedTime);
     }
 
     @Test
@@ -54,8 +62,8 @@ class PaymentMapperTest {
                 .status(PaymentStatus.FAILED)
                 .razorpayId(null)
                 .failureReason("BAD_REQUEST_ERROR: amount must be no less than 0.")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(fixedTime)
+                .updatedAt(fixedTime)
                 .build();
 
         PaymentResponse result = PaymentMapper.toDTO(payment);

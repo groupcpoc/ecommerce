@@ -12,6 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +27,14 @@ class PaymentEventPublisherTest {
 
     @InjectMocks
     private PaymentEventPublisher paymentEventPublisher;
+
+    LocalDateTime fixedTime = LocalDateTime.of(
+            2024,
+            Month.JANUARY,
+            1,
+            10,
+            30
+    );
 
     private OrderCreatedEvent buildOrderCreatedEvent() {
         return OrderCreatedEvent.newBuilder()
@@ -44,8 +53,8 @@ class PaymentEventPublisherTest {
                 .amount(BigDecimal.valueOf(499.99))
                 .status(PaymentStatus.REFUNDED)
                 .razorpayId("order_test123")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(fixedTime)
+                .updatedAt(fixedTime)
                 .build();
     }
 

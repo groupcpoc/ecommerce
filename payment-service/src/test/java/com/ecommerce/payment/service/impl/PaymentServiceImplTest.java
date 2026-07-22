@@ -110,7 +110,7 @@ class PaymentServiceImplTest {
 
         @Test
         @DisplayName("does nothing when a payment already exists for the orderId (idempotency guard)")
-        void skipsProcessingOnDuplicateOrderId() throws RazorpayException {
+        void skipsProcessingOnDuplicateOrderId(){
             OrderCreatedEvent event = mock(OrderCreatedEvent.class);
             when(event.getOrderId()).thenReturn(ORDER_ID);
             when(paymentRepository.existsByOrderId(ORDER_ID)).thenReturn(true);
