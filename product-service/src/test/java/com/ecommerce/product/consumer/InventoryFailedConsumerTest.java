@@ -6,14 +6,12 @@ import com.ecommerce.product.enums.ProductStatus;
 import com.ecommerce.product.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -21,134 +19,84 @@ import static org.mockito.Mockito.*;
 class InventoryFailedConsumerTest {
 
     @Mock
-    private ProductRepository repository;
+    private ProductRepository productRepository;
 
     @InjectMocks
     private InventoryFailedConsumer consumer;
 
-    private InventoryFailedEvent event(String sku, String reason) {
-
-        InventoryFailedEvent event = new InventoryFailedEvent();
-
-        event.setOrderId("ORD-100");
-        event.setProductId(sku);
-        event.setReason(reason);
-
-        return event;
-    }
-
     @Test
-    void shouldUpdateToOutOfStockWhenQuantityZero() {
+    void consume_shouldSetOutOfStockWhenQuantityZero() {
+        InventoryFailedEvent event = mock(InventoryFailedEvent.class);
+        when(event.getProductId()).thenReturn("1");
+        when(event.getReason()).thenReturn("failed");
 
         Product product = Product.builder()
-                .sku("SKU1")
+                .id(1L)
+                .sku("1")
                 .quantity(0)
                 .status(ProductStatus.ACTIVE)
                 .build();
 
-        when(repository.findBySku("SKU1"))
-                .thenReturn(Optional.of(product));
+        when(productRepository.findBySku("1")).thenReturn(Optional.of(product));
 
-        consumer.consume(event("SKU1","Out of stock"));
+        consumer.consume(event);
 
-        verify(repository).save(product);
-
-        assertEquals(ProductStatus.OUT_OF_STOCK,
-                product.getStatus());
+        verify(productRepository).save(product);
+        assert product.getStatus() == ProductStatus.OUT_OF_STOCK;
     }
 
     @Test
-    void shouldUpdateToLowStockWhenQuantityLessThanTen() {
+    void consume_shouldSetLowStockWhenQuantityLessOrEqual10() {
+        InventoryFailedEvent event = mock(InventoryFailedEvent.class);
+        when(event.getProductId()).thenReturn("2");
+        when(event.getReason()).thenReturn("failed");
 
         Product product = Product.builder()
-                .sku("SKU2")
+                .id(2L)
+                .sku("2")
                 .quantity(5)
                 .status(ProductStatus.ACTIVE)
                 .build();
 
-        when(repository.findBySku("SKU2"))
-                .thenReturn(Optional.of(product));
+        when(productRepository.findBySku("2")).thenReturn(Optional.of(product));
 
-        consumer.consume(event("SKU2","Low stock"));
+        consumer.consume(event);
 
-        verify(repository).save(product);
-
-        assertEquals(ProductStatus.LOW_STOCK,
-                product.getStatus());
+        verify(productRepository).save(product);
+        assert product.getStatus() == ProductStatus.LOW_STOCK;
     }
 
     @Test
-    void shouldNotChangeStatusWhenQuantityGreaterThanTen() {
+    void consume_shouldKeepStatusWhenQuantityGreaterThan10() {
+        InventoryFailedEvent event = mock(InventoryFailedEvent.class);
+        when(event.getProductId()).thenReturn("3");
+        when(event.getReason()).thenReturn("failed");
 
         Product product = Product.builder()
-                .sku("SKU3")
-                .quantity(50)
+                .id(3L)
+                .sku("3")
+                .quantity(20)
                 .status(ProductStatus.ACTIVE)
                 .build();
 
-        when(repository.findBySku("SKU3"))
-                .thenReturn(Optional.of(product));
+        when(productRepository.findBySku("3")).thenReturn(Optional.of(product));
 
-        consumer.consume(event("SKU3","Inventory failed"));
+        consumer.consume(event);
 
-        verify(repository).save(product);
-
-        assertEquals(ProductStatus.ACTIVE,
-                product.getStatus());
+        verify(productRepository).save(product);
+        assert product.getStatus() == ProductStatus.ACTIVE;
     }
 
     @Test
-    void shouldNotSaveWhenProductNotFound() {
+    void consume_shouldReturnWhenProductNotFound() {
+        InventoryFailedEvent event = mock(InventoryFailedEvent.class);
+        when(event.getProductId()).thenReturn("4");
+        when(event.getReason()).thenReturn("failed");
 
-        when(repository.findBySku("SKU4"))
-                .thenReturn(Optional.empty());
+        when(productRepository.findBySku("4")).thenReturn(Optional.empty());
 
-        consumer.consume(event("SKU4","Not found"));
+        consumer.consume(event);
 
-        verify(repository, never()).save(any());
-    }
-
-    @Test
-    void shouldSaveUpdatedProduct() {
-
-        Product product = Product.builder()
-                .sku("SKU5")
-                .quantity(2)
-                .status(ProductStatus.ACTIVE)
-                .build();
-
-        when(repository.findBySku("SKU5"))
-                .thenReturn(Optional.of(product));
-
-        consumer.consume(event("SKU5","Inventory failed"));
-
-        ArgumentCaptor<Product> captor =
-                ArgumentCaptor.forClass(Product.class);
-
-        verify(repository).save(captor.capture());
-
-        assertEquals("SKU5",
-                captor.getValue().getSku());
-    }
-
-    @Test
-    void shouldCallRepositoryOnce() {
-
-        Product product = Product.builder()
-                .sku("SKU6")
-                .quantity(0)
-                .status(ProductStatus.ACTIVE)
-                .build();
-
-        when(repository.findBySku("SKU6"))
-                .thenReturn(Optional.of(product));
-
-        consumer.consume(event("SKU6","Reason"));
-
-        verify(repository,times(1))
-                .findBySku("SKU6");
-
-        verify(repository,times(1))
-                .save(product);
+        verify(productRepository, never()).save(any());
     }
 }

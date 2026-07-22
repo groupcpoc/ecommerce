@@ -129,6 +129,6 @@ class ProductResponseTest {
 
         ProductResponse response = new ProductResponse();
 
-        assertNotEquals(response, "ABC");
+        assertNotEquals("ABC", response);
     }
 }
