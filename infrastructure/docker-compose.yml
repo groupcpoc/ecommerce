@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   # ── Zookeeper ──────────────────────────────────────────────────
@@ -78,7 +76,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -89,7 +87,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
     container_name: ecommerce-keycloak
-    command: start-dev
+    command: start-dev --import-realm
     ports:
       - "8080:8080"
     environment:
@@ -99,9 +97,17 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/ecommerce_keycloak_db
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: postgres
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8080/realms/ecommerce || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
     networks:
       - ecommerce-network
 
@@ -122,16 +128,7 @@ services:
     networks:
       - ecommerce-network
 
-  # ── SonarQube ──────────────────────────────────────────────────
-  sonarqube:
-    image: sonarqube:community
-    container_name: ecommerce-sonarqube
-    ports:
-      - "9000:9000"
-    networks:
-      - ecommerce-network
-
-  # ── Eureka Server ──────────────────────────────────────────────
+  # ── eureka-server ────────────────────────────────────────────────────
   eureka-server:
     build:
       context: ../eureka-server
@@ -142,7 +139,7 @@ services:
     networks:
       - ecommerce-network
 
-  # ── API Gateway ────────────────────────────────────────────────
+  # ── api-gateway ────────────────────────────────────────────────────
   api-gateway:
     build:
       context: ../api-gateway
@@ -151,15 +148,140 @@ services:
     ports:
       - "9090:9000"
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/ecommerce/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/ecommerce-keycloak/protocol/openid-connect/certs
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
     depends_on:
       - eureka-server
       - keycloak
     networks:
       - ecommerce-network
 
-  # ── Inventory Service ──────────────────────────────────────────
+  # ── auth-service ───────────────────────────────────────────────
+  # auth-service:
+  #   build:
+  #     context: ../auth-service
+  #     dockerfile: Dockerfile
+  #   container_name: ecommerce-auth-service
+  #   ports:
+  #     - "8082:8082"
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_auth_db
+  #     SPRING_DATASOURCE_USERNAME: postgres
+  #     SPRING_DATASOURCE_PASSWORD: postgres
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  #     SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+  #     KEYCLOAK_SERVER_URL: http://keycloak:8080
+  #     KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+  #     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_started
+  #     keycloak:
+  #       condition: service_healthy
+  #   networks:
+  #     - ecommerce-network
+
+  # ── user-service ───────────────────────────────────────────────
+  # user-service:
+  #   build:
+  #     context: ../user-service
+  #     dockerfile: Dockerfile
+  #   container_name: ecommerce-user-service
+  #   ports:
+  #     - "8083:8083"
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_user_db
+  #     SPRING_DATASOURCE_USERNAME: postgres
+  #     SPRING_DATASOURCE_PASSWORD: postgres
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  #     SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+  #     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_started
+  #   networks:
+  #     - ecommerce-network
+
+  # ── product-service ────────────────────────────────────────────
+  # product-service:
+  #   build:
+  #     context: ../product-service
+  #     dockerfile: Dockerfile
+  #   container_name: ecommerce-product-service
+  #   ports:
+  #     - "8084:8084"
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_product_db
+  #     SPRING_DATASOURCE_USERNAME: postgres
+  #     SPRING_DATASOURCE_PASSWORD: postgres
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  #     SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+  #     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_started
+  #   networks:
+  #     - ecommerce-network
+
+  # ── order-service ──────────────────────────────────────────────
+  # order-service:
+  #   build:
+  #     context: ../order-service
+  #     dockerfile: Dockerfile
+  #   container_name: ecommerce-order-service
+  #   ports:
+  #     - "8086:8086"
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_order_db
+  #     SPRING_DATASOURCE_USERNAME: postgres
+  #     SPRING_DATASOURCE_PASSWORD: postgres
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  #     SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+  #     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_started
+  #   networks:
+  #     - ecommerce-network
+
+  # ── payment service ────────────────────────────────────────────────────
+  # payment-service:
+  #   build:
+  #     context: ../payment-service
+  #     dockerfile: Dockerfile
+  #   container_name: ecommerce-payment-service
+  #   ports:
+  #     - "8087:8087"
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_payment_db
+  #     SPRING_DATASOURCE_USERNAME: postgres
+  #     SPRING_DATASOURCE_PASSWORD: postgres
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  #     SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+  #     RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+  #     RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+  #     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_started
+  #     schema-registry:
+  #       condition: service_started
+  #   networks:
+  #     - ecommerce-network
+
+  # ── inventory-service ──────────────────────────────────────────
   inventory-service:
     build:
       context: ../inventory-service
@@ -168,23 +290,52 @@ services:
     ports:
       - "8088:8088"
     environment:
-      - SERVER_PORT=8088
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecommerce_inventory_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - APP_KAFKA_ENABLED=true
-      - KAFKA_LISTENER_AUTO_STARTUP=true
-      - APP_KAFKA_CREATE_TOPICS=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_inventory_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
       postgres:
         condition: service_healthy
       kafka:
         condition: service_started
-      eureka-server:
-        condition: service_started
+    networks:
+      - ecommerce-network
+
+  #── notification-service ───────────────────────────────────────
+  # notification-service:
+  #   build:
+  #     context: ../notification-service
+  #     dockerfile: Dockerfile
+  #   container_name: ecommerce-notification-service
+  #   ports:
+  #     - "8089:8089"
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_notification_db
+  #     SPRING_DATASOURCE_USERNAME: postgres
+  #     SPRING_DATASOURCE_PASSWORD: postgres
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  #     SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+  #     USER_SERVICE_URL: http://user-service:8083
+  #     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_started
+  #   networks:
+  #     - ecommerce-network
+
+  # ── SonarQube ──────────────────────────────────────────────────
+  sonarqube:
+    image: sonarqube:community
+    container_name: ecommerce-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
     networks:
       - ecommerce-network
 

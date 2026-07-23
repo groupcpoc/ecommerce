@@ -1,1 +1,0 @@
- 2javaX#hrQsrc/main/java/com/ecommerce/inventoryservice/consumer/KafkaInventoryConsumer.java

@@ -7,6 +7,176 @@
 	},
 	"item": [
 		{
+			"name": "Get Admin Access Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"var token = null;",
+							"if (jsonData.access_token) {",
+							"    token = jsonData.access_token;",
+							"} else if (jsonData.data && jsonData.data.access_token) {",
+							"    token = jsonData.data.access_token;",
+							"} else if (jsonData.data && jsonData.data.accessToken) {",
+							"    token = jsonData.data.accessToken;",
+							"}",
+							"if (token) {",
+							"    pm.collectionVariables.set(\"ACCESS_TOKEN\", token);",
+							"    console.log(\"Admin access token saved to collection variable ACCESS_TOKEN\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "order-service-client",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "FYUWhqOw0yVL5kLNTxitlaQgGWo2xekn",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/realms/ecommerce/protocol/openid-connect/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"realms",
+						"ecommerce",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Delivery Executive Access Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"var token = null;",
+							"if (jsonData.access_token) {",
+							"    token = jsonData.access_token;",
+							"} else if (jsonData.data && jsonData.data.access_token) {",
+							"    token = jsonData.data.access_token;",
+							"} else if (jsonData.data && jsonData.data.accessToken) {",
+							"    token = jsonData.data.accessToken;",
+							"}",
+							"if (token) {",
+							"    pm.collectionVariables.set(\"ACCESS_TOKEN\", token);",
+							"    console.log(\"Delivery Executive access token saved to collection variable ACCESS_TOKEN\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "order-service-client",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "FYUWhqOw0yVL5kLNTxitlaQgGWo2xekn",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "delivery",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/realms/ecommerce/protocol/openid-connect/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"realms",
+						"ecommerce",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Admin Endpoints",
 			"item": [
 				{
@@ -219,12 +389,7 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "Customer / Common Endpoints",
-			"item": [
+				},
 				{
 					"name": "Get Inventory by Product ID",
 					"request": {
@@ -253,7 +418,12 @@
 						}
 					},
 					"response": []
-				},
+				}
+			]
+		},
+		{
+			"name": "Delivery Executive Endpoints",
+			"item": [
 				{
 					"name": "Get Order Stock by Order ID",
 					"request": {

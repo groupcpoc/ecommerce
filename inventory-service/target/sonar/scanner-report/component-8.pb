@@ -1,1 +1,0 @@
- 2javaXchrGsrc/main/java/com/ecommerce/inventoryservice/dto/InventoryResponse.java

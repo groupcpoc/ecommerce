@@ -89,7 +89,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
     container_name: ecommerce-keycloak
-    command: start-dev
+    command: start-dev --import-realm
     ports:
       - "8080:8080"
     environment:
@@ -99,6 +99,8 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/ecommerce_keycloak_db
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: postgres
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     depends_on:
       postgres:
         condition: service_healthy
@@ -153,6 +155,7 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/ecommerce/protocol/openid-connect/certs
+      - KEYCLOAK_SERVER_URL=http://keycloak:8080
     depends_on:
       - eureka-server
       - keycloak

@@ -1,1 +1,0 @@
- 2javaXhrMsrc/main/java/com/ecommerce/inventoryservice/InventoryServiceApplication.java

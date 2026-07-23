@@ -1,1 +1,0 @@
- 2javaX=hrLsrc/main/java/com/ecommerce/inventoryservice/entity/ProcessedKafkaEvent.java

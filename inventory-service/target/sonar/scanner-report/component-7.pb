@@ -1,1 +1,0 @@
- 2javaXBhrLsrc/main/java/com/ecommerce/inventoryservice/dto/InventoryCreateRequest.java

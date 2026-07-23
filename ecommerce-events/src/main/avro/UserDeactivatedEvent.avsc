@@ -1,0 +1,15 @@
+{
+  "namespace": "com.ecommerce.events",
+  "type": "record",
+  "name": "UserDeactivatedEvent",
+  "fields": [
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "email",
+      "type": "string"
+    }
+  ]
+}

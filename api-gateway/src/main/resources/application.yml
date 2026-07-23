@@ -9,7 +9,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://localhost:8080/realms/ecommerce/protocol/openid-connect/certs}
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://keycloak:8080/realms/ecommerce-keycloak/protocol/openid-connect/certs}
 
   cloud:
     gateway:
@@ -55,7 +55,7 @@ management:
   endpoints:
     web:
       exposure:
-        include:  health,info
+        include: health,info
   endpoint:
     health:
       show-details: always
